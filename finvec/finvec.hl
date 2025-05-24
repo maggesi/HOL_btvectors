@@ -566,7 +566,6 @@ let HAS_VECTOR_COMPONENT0_ARITH = prove
 (* Conversion for computing the component of a binary-indexed vector.        *)
 (* ------------------------------------------------------------------------- *)
 
-
 let VECTOR_COMPONENT0_CONV : conv =
   let MK_HAS_VECTOR_COMPONENT0 : term -> thm =
     let dest_cart_ty =

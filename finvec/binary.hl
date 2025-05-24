@@ -124,7 +124,6 @@ let NUM_CASES_BINARY = prove
  (`!n. n = 0 \/ (?m. n = 2 * m) \/ (?m. n = 2 * m + 1)`,
   MESON_TAC[NUM_BINARY_CASES_STRONG]);;
 
-(*
 let FORALL_LT_BINARY = prove
  (`(!i. i < 0 ==> P i) /\
    ((!i. i < 1 ==> P i) <=> P 0) /\
@@ -172,7 +171,6 @@ let FORALL_LE_BINARY = prove
    STRUCT_CASES_TAC (SPEC `i:num` NUM_CASES_BINARY) THEN
    REWRITE_TAC[NUM_LE_BINARY] THEN ASM_SIMP_TAC[] THEN
    POP_ASSUM (MP_TAC o SPEC `0`) THEN NUM_REDUCE_TAC THEN SIMP_TAC[LE_0]]);;
-*)
 
 (* ------------------------------------------------------------------------- *)
 (* Binary representation of numeric segments.                                *)

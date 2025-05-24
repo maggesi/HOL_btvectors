@@ -8,5 +8,4 @@
 needs "finvec/matrices.hl";;        (* Definitions and lemmata on matrices  *)
 loadt "finvec/binary.hl";;          (* Computing with binary expansions     *)
 loadt "finvec/vector0.hl";;         (* Zero-based vectors                   *)
-loadt "finvec/fintypes.hl";;        (* Finite types                         *)
 loadt "finvec/finvec.hl";;          (* Vectors indexed by fintypes          *)
