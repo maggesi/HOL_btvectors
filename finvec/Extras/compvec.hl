@@ -1,0 +1,58 @@
+(* ========================================================================= *)
+(* Computing components using COMPUTE_CONV.                                  *)
+(*                                                                           *)
+(* (c) Copyright, Andrea Gabrielli, Marco Maggesi 2016-2018                  *)
+(* ========================================================================= *)
+
+let VEC0_CLAUSE = prove
+ (`!x y:A^N i. vec0 x y$.i =
+                 if 2 * dimindex(:N) <= i then vec0 x y$.i else
+                 (if EVEN i then x else y) $. (i DIV 2)`,
+  REPEAT GEN_TAC THEN REWRITE_TAC[VEC0_DEF] THEN
+  ASM_CASES_TAC `2 * dimindex(:N) <= i` THEN ASM_REWRITE_TAC[] THEN
+  FIRST_X_ASSUM (ASSUME_TAC o REWRITE_RULE[NOT_LE; GSYM DIMINDEX_TYBIT0]) THEN
+  ASM_SIMP_TAC[LAMBDA0_BETA]);;
+
+let VEC1_CLAUSE = prove
+ (`!x y:A^N a i. vec1 x y a$.i =
+                 if 2 * dimindex(:N) < i then vec1 x y a$.i else
+                 if 2 * dimindex(:N) = i then a else
+                 (if EVEN i then x else y) $. (i DIV 2)`,
+  REPEAT GEN_TAC THEN REWRITE_TAC[VEC1_DEF_OLD] THEN
+  ASM_CASES_TAC `2 * dimindex(:N) < i` THEN ASM_REWRITE_TAC[] THEN
+  FIRST_X_ASSUM (ASSUME_TAC o
+    REWRITE_RULE[NOT_LT; GSYM DIMINDEX_TYBIT1;
+                 ARITH_RULE `i <= n <=> i < n + 1`]) THEN
+  SUBGOAL_THEN `BIT0 (dimindex(:N)) = dimindex(:N) + dimindex(:N)`
+    SUBST1_TAC THENL
+  [REWRITE_TAC[BIT0]; ASM_SIMP_TAC[LAMBDA0_BETA]] THEN
+  REWRITE_TAC[ARITH_RULE `i = a + a <=> 2 * a = i`]);;
+
+load_path := "/home/maggesi/Devel/HOL" :: !load_path;;
+loadt "/home/maggesi/Devel/HOL/Snippets/compute.hl";;
+
+extend_compute_convs ("DIMINDEX_CONV",(`dimindex (a:N->bool)`,DIMINDEX_CONV));;
+
+let VEC_CONV = COMPUTE_CONV [VEC0_CLAUSE; VEC1_CLAUSE; VECX_COMPONENT0];;
+
+(* ------------------------------------------------------------------------- *)
+(* Examples.                                                                 *)
+(* ------------------------------------------------------------------------- *)
+
+VEC_CONV `vecx 8 $. 0`;;
+VEC_CONV `vec0 (vecx x) (vecx 8) $. 0`;;
+VEC_CONV `vec1 (vecx x) (vecx 8) 3 $. 0`;;
+VEC_CONV `vec0 (vecx x) (vecx 8) $. 1`;;
+VEC_CONV `vec1 (vecx x) (vecx 8) 3 $. 1`;;
+VEC_CONV `vec1 (vecx x) (vecx 8) 3 $. 2`;;
+
+VEC_CONV `vec0 (vec1 (vecx x) (vecx 8) 3) (vec1 (vecx y) (vecx 42) 9) $. 0`;;
+VEC_CONV `vec0 (vec1 (vecx x) (vecx 8) 3) (vec1 (vecx y) (vecx 42) 9) $. 1`;;
+VEC_CONV `vec0 (vec1 (vecx x) (vecx 8) 3) (vec1 (vecx y) (vecx 42) 9) $. 2`;;
+VEC_CONV `vec0 (vec1 (vecx x) (vecx 8) 3) (vec1 (vecx y) (vecx 42) 9) $. 3`;;
+VEC_CONV `vec0 (vec1 (vecx x) (vecx 8) 3) (vec1 (vecx y) (vecx 42) 9) $. 4`;;
+VEC_CONV `vec0 (vec1 (vecx x) (vecx 8) 3) (vec1 (vecx y) (vecx 42) 9) $. 5`;;
+(* Diverges! *)
+(*
+VEC_CONV `vec0 (vec1 (vecx x) (vecx 8) 3) (vec1 (vecx y) (vecx 42) 9) $. 6`;;
+*)

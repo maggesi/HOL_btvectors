@@ -1,0 +1,177 @@
+
+(* ------------------------------------------------------------------------- *)
+
+let NUMINTERVAL_ARITH = prove
+ (`(!n i. n <= i /\ i <= n <=> i = n) /\
+   (!n i. n < i /\ i <= n <=> F) /\
+   (!n i. n <= i /\ i < n <=> F) /\
+   (!n i. n < i /\ i < n <=> F) /\
+
+   (!n i. _0 <= i /\ i <= n <=> i <= n) /\
+
+   (!n i. _0 < i /\ i <= BIT0 n <=>
+            (?j. i = BIT0 j /\ _0 < j /\ j <= n) \/
+            (?j. i = BIT1 j /\ j < n)) /\
+   (!n i. _0 < i /\ i < BIT0 n <=>
+            (?j. i = BIT0 j /\ _0 < j /\ j < n) \/
+            (?j. i = BIT1 j /\ j < n)) /\
+
+   (!n i. _0 < i /\ i <= BIT1 n <=>
+            (?j. i = BIT0 j /\ _0 < j /\ j <= n) \/
+            (?j. i = BIT1 j /\ j <= n)) /\
+   (!n i. _0 < i /\ i < BIT1 n <=>
+            (?j. i = BIT0 j /\ _0 < j /\ j <= n) \/
+            (?j. i = BIT1 j /\ j < n)) /\
+
+   (!m n i. BIT0 m <= i /\ i <= BIT0 n <=>
+            (?j. i = BIT0 j /\ m <= j /\ j <= n) \/
+            (?j. i = BIT1 j /\ m <= j /\ j < n)) /\
+   (!m n i. BIT0 m < i /\ i <= BIT0 n <=>
+            (?j. i = BIT0 j /\ m < j /\ j <= n) \/
+            (?j. i = BIT1 j /\ m <= j /\ j < n)) /\
+   (!m n i. BIT0 m <= i /\ i < BIT0 n <=>
+            (?j. i = BIT0 j /\ m <= j /\ j < n) \/
+            (?j. i = BIT1 j /\ m <= j /\ j < n)) /\
+   (!m n i. BIT0 m < i /\ i < BIT0 n <=>
+            (?j. i = BIT0 j /\ m < j /\ j < n) \/
+            (?j. i = BIT1 j /\ m <= j /\ j < n)) /\
+
+   (!m n i. BIT0 m <= i /\ i <= BIT1 n <=>
+            (?j. i = BIT0 j /\ m <= j /\ j <= n) \/
+            (?j. i = BIT1 j /\ m <= j /\ j <= n)) /\
+   (!m n i. BIT0 m < i /\ i <= BIT1 n <=>
+            (?j. i = BIT0 j /\ m < j /\ j <= n) \/
+            (?j. i = BIT1 j /\ m <= j /\ j <= n)) /\
+   (!m n i. BIT0 m <= i /\ i < BIT1 n <=>
+            (?j. i = BIT0 j /\ m <= j /\ j <= n) \/
+            (?j. i = BIT1 j /\ m <= j /\ j < n)) /\
+   (!m n i. BIT0 m < i /\ i < BIT1 n <=>
+            (?j. i = BIT0 j /\ m < j /\ j <= n) \/
+            (?j. i = BIT1 j /\ m <= j /\ j < n)) /\
+
+   (!m n i. BIT1 m <= i /\ i <= BIT0 n <=>
+            (?j. i = BIT0 j /\ m < j /\ j <= n) \/
+            (?j. i = BIT1 j /\ m <= j /\ j < n)) /\
+   (!m n i. BIT1 m < i /\ i <= BIT0 n <=>
+            (?j. i = BIT0 j /\ m < j /\ j <= n) \/
+            (?j. i = BIT1 j /\ m < j /\ j < n)) /\
+   (!m n i. BIT1 m <= i /\ i < BIT0 n <=>
+            (?j. i = BIT0 j /\ m < j /\ j < n) \/
+            (?j. i = BIT1 j /\ m <= j /\ j < n)) /\
+   (!m n i. BIT1 m < i /\ i < BIT0 n <=>
+            (?j. i = BIT0 j /\ m < j /\ j < n) \/
+            (?j. i = BIT1 j /\ m < j /\ j < n)) /\
+
+   (!m n i. BIT1 m <= i /\ i <= BIT1 n <=>
+            (?j. i = BIT0 j /\ m < j /\ j <= n) \/
+            (?j. i = BIT1 j /\ m <= j /\ j <= n)) /\
+   (!m n i. BIT1 m < i /\ i <= BIT1 n <=>
+            (?j. i = BIT0 j /\ m < j /\ j <= n) \/
+            (?j. i = BIT1 j /\ m < j /\ j <= n)) /\
+   (!m n i. BIT1 m <= i /\ i < BIT1 n <=>
+            (?j. i = BIT0 j /\ m < j /\ j <= n) \/
+            (?j. i = BIT1 j /\ m <= j /\ j < n)) /\
+   (!m n i. BIT1 m < i /\ i < BIT1 n <=>
+            (?j. i = BIT0 j /\ m < j /\ j <= n) \/
+            (?j. i = BIT1 j /\ m < j /\ j < n))`,
+  CONJ_TAC THENL [ARITH_TAC; ALL_TAC] THEN
+  CONJ_TAC THENL [ARITH_TAC; ALL_TAC] THEN
+  CONJ_TAC THENL [ARITH_TAC; ALL_TAC] THEN
+  CONJ_TAC THENL [ARITH_TAC; REPEAT CONJ_TAC] THEN
+  REPEAT GEN_TAC THEN CONV_TAC BITS_ELIM_CONV THEN
+  (EQ_TAC THENL [STRIP_TAC; ARITH_TAC] THEN
+   ASM_CASES_TAC `EVEN i` THENL [DISJ1_TAC; DISJ2_TAC] THEN
+   MP_TAC (SPEC `i:num` EVEN_EXISTS_LEMMA) THEN ASM_REWRITE_TAC[] THEN
+   DISCH_THEN (X_CHOOSE_TAC `a:num`) THEN EXISTS_TAC `a:num` THEN
+   POP_ASSUM SUBST_VAR_TAC THEN ASM_ARITH_TAC));;
+
+let FORALL_NUMINTERVAL = prove
+ (`(!P m n. (!i. NUMERAL m <= i /\ i <= NUMERAL n ==> P i) <=> 
+            (!i. m <= i /\ i <= n ==> P (NUMERAL i))) /\
+   (!P m n. (!i. NUMERAL m < i /\ i <= NUMERAL n ==> P i) <=> 
+            (!i. m < i /\ i <= n ==> P (NUMERAL i))) /\
+   (!P m n. (!i. NUMERAL m <= i /\ i < NUMERAL n ==> P i) <=> 
+            (!i. m <= i /\ i < n ==> P (NUMERAL i))) /\
+   (!P m n. (!i. NUMERAL m < i /\ i < NUMERAL n ==> P i) <=> 
+            (!i. m < i /\ i < n ==> P (NUMERAL i))) /\
+
+   (!P a. (!i. a <= i /\ i <= a ==> P i) <=> P a) /\
+   (!P a. (!i. a < i /\ i <= a ==> P i) <=> T) /\
+   (!P a. (!i. a <= i /\ i < a ==> P i) <=> T) /\
+   (!P a. (!i. a < i /\ i < a ==> P i) <=> T) /\
+
+   (!P n. (!i. _0 <= i /\ i <= n ==> P i) <=>
+          (!i. i <= n ==> P i)) /\
+
+   (!P n. (!i. _0 < i /\ i <= BIT0 n ==> P i) <=>
+          (!j. _0 < j /\ j <= n ==> P (BIT0 j)) /\
+          (!j. j < n ==> P (BIT1 j))) /\
+   (!P n. (!i. _0 < i /\ i < BIT0 n ==> P i) <=>
+          (!j. _0 < j /\ j < n ==> P (BIT0 j)) /\
+          (!j. j < n ==> P (BIT1 j))) /\
+
+   (!P n. (!i. _0 < i /\ i <= BIT1 n ==> P i) <=>
+          (!j. _0 < j /\ j <= n ==> P (BIT0 j)) /\
+          (!j. j <= n ==> P (BIT1 j))) /\
+   (!P n. (!i. _0 < i /\ i < BIT1 n ==> P i) <=>
+          (!j. _0 < j /\ j <= n ==> P (BIT0 j)) /\
+          (!j. j < n ==> P (BIT1 j))) /\
+
+   (!P m n. (!i. BIT0 m <= i /\ i <= BIT0 n ==> P i) <=>
+            (!j. m <= j /\ j <= n ==> P (BIT0 j)) /\
+            (!j. m <= j /\ j < n ==> P (BIT1 j))) /\
+   (!P m n. (!i. BIT0 m < i /\ i <= BIT0 n ==> P i) <=>
+            (!j. m < j /\ j <= n ==> P (BIT0 j)) /\
+            (!j. m <= j /\ j < n ==> P (BIT1 j))) /\
+   (!P m n. (!i. BIT0 m <= i /\ i < BIT0 n ==> P i) <=>
+            (!j. m <= j /\ j < n ==> P (BIT0 j)) /\
+            (!j. m <= j /\ j < n ==> P (BIT1 j))) /\
+   (!P m n. (!i. BIT0 m < i /\ i < BIT0 n ==> P i) <=>
+            (!j. m < j /\ j < n ==> P (BIT0 j)) /\
+            (!j. m <= j /\ j < n ==> P (BIT1 j))) /\
+
+   (!P m n. (!i. BIT0 m <= i /\ i <= BIT1 n ==> P i) <=>
+            (!j. m <= j /\ j <= n ==> P (BIT0 j)) /\
+            (!j. m <= j /\ j <= n ==> P (BIT1 j))) /\
+   (!P m n. (!i. BIT0 m < i /\ i <= BIT1 n ==> P i) <=>
+            (!j. m < j /\ j <= n ==> P (BIT0 j)) /\
+            (!j. m <= j /\ j <= n ==> P (BIT1 j))) /\
+   (!P m n. (!i. BIT0 m <= i /\ i < BIT1 n ==> P i) <=>
+            (!j. m <= j /\ j <= n ==> P (BIT0 j)) /\
+            (!j. m <= j /\ j < n ==> P (BIT1 j))) /\
+   (!P m n. (!i. BIT0 m < i /\ i < BIT1 n ==> P i) <=>
+            (!j. m < j /\ j <= n ==> P (BIT0 j)) /\
+            (!j. m <= j /\ j < n ==> P (BIT1 j))) /\
+
+   (!P m n. (!i. BIT1 m <= i /\ i <= BIT0 n ==> P i) <=>
+            (!j. m < j /\ j <= n ==> P (BIT0 j)) /\
+            (!j. m <= j /\ j < n ==> P (BIT1 j))) /\
+   (!P m n. (!i. BIT1 m < i /\ i <= BIT0 n ==> P i) <=>
+            (!j. m < j /\ j <= n ==> P (BIT0 j)) /\
+            (!j. m < j /\ j < n ==> P (BIT1 j))) /\
+   (!P m n. (!i. BIT1 m <= i /\ i < BIT0 n ==> P i) <=>
+            (!j. m < j /\ j < n ==> P (BIT0 j)) /\
+            (!j. m <= j /\ j < n ==> P (BIT1 j))) /\
+   (!P m n. (!i. BIT1 m < i /\ i < BIT0 n ==> P i) <=>
+            (!j. m < j /\ j < n ==> P (BIT0 j)) /\
+            (!j. m < j /\ j < n ==> P (BIT1 j))) /\
+
+   (!P m n. (!i. BIT1 m <= i /\ i <= BIT1 n ==> P i) <=>
+            (!j. m < j /\ j <= n ==> P (BIT0 j)) /\
+            (!j. m <= j /\ j <= n ==> P (BIT1 j))) /\
+   (!P m n. (!i. BIT1 m < i /\ i <= BIT1 n ==> P i) <=>
+            (!j. m < j /\ j <= n ==> P (BIT0 j)) /\
+            (!j. m < j /\ j <= n ==> P (BIT1 j))) /\
+   (!P m n. (!i. BIT1 m <= i /\ i < BIT1 n ==> P i) <=>
+            (!j. m < j /\ j <= n ==> P (BIT0 j)) /\
+            (!j. m <= j /\ j < n ==> P (BIT1 j))) /\
+   (!P m n. (!i. BIT1 m < i /\ i < BIT1 n ==> P i) <=>
+            (!j. m < j /\ j <= n ==> P (BIT0 j)) /\
+            (!j. m < j /\ j < n ==> P (BIT1 j)))`,
+  REWRITE_TAC[NUMERAL] THEN REPEAT CONJ_TAC THEN
+  REWRITE_TAC[NUMINTERVAL_ARITH] THEN MESON_TAC[]);;
+
+g `vector[3;a;b;1;5] = vector[a;1;b;c;0]`;;
+e (REWRITE_TAC[CART_EQ]);;
+e (CONV_TAC (ONCE_DEPTH_CONV DIMINDEX_CONV));;
+e (REWRITE_TAC[FORALL_NUMINTERVAL]);;

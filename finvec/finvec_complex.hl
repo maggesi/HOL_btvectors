@@ -1,0 +1,115 @@
+(* ========================================================================= *)
+(* Complex vectors indexed by fintypes.                                      *)
+(*                                                                           *)
+(* (c) Copyright, Andrea Gabrielli, Marco Maggesi 2017-2018                  *)
+(* ========================================================================= *)
+
+needs "cvectors/make.hl";;
+
+(* ------------------------------------------------------------------------- *)
+(* Zero-based matrix rows components.                                        *)
+(* ------------------------------------------------------------------------- *)
+
+let MATRIX_ADD_ROW0 = prove
+ (`!X Y:real^M^N i. (X + Y) $. i = X $. i + Y $. i`,
+  REWRITE_TAC[component0; MATRIX_ADD_ROW]);;
+
+let MATRIX_SUB_ROW0 = prove
+ (`!X Y:real^M^N i. (X - Y) $. i = X $. i - Y $. i`,
+  REWRITE_TAC[component0; MATRIX_SUB_ROW]);;
+
+let MATRIX_NEG_ROW0 = prove
+ (`!X:real^M^N i. (--X) $. i = --(X $. i)`,
+  REWRITE_TAC[component0; MATRIX_NEG_ROW]);;
+
+let MATRIX_CMUL_ROW0 = prove
+ (`!c X:real^M^N i. (c %% X) $. i = c % (X $. i)`,
+  REWRITE_TAC[component0; MATRIX_CMUL_ROW]);;
+
+let MAT_0_ROW0 = prove
+ (`mat 0:real^M^N $. i = vec 0`,
+  REWRITE_TAC[component0; MAT_0_ROW]);;
+
+(* ------------------------------------------------------------------------- *)
+(* Zero-based complex vector components.                                     *)
+(* ------------------------------------------------------------------------- *)
+
+let CVECTOR_MUL_COMPONENT0 = prove
+ (`!c:complex x:complex^N i. (c % x) $. i = c * x $. i`,
+  REWRITE_TAC[component0; CVECTOR_MUL_COMPONENT]);;
+
+let CDOT0 = prove
+ (`!x y:complex^N.
+     x cdot y = vsum {i | i < dimindex(:N)} (\i. x$.i * cnj(y$.i))`,
+  GEN_TAC THEN GEN_TAC THEN REWRITE_TAC[cdot; component0] THEN
+  SIMP_TAC[VSUM_OFFSET_0; DIMINDEX_GE_1] THEN AP_THM_TAC THEN AP_TERM_TAC THEN
+  REWRITE_TAC[EXTENSION; IN_NUMSEG; IN_ELIM_THM] THEN GEN_TAC THEN
+  SUBGOAL_THEN `1 <= dimindex(:N)` MP_TAC THENL
+  [REWRITE_TAC[DIMINDEX_GE_1]; ARITH_TAC]);;
+
+(* ------------------------------------------------------------------------- *)
+(* TODO: Generalizzare alle matrici.                                         *)
+(* ------------------------------------------------------------------------- *)
+
+let COMPLEX_VECTOR_ADD_ARITH = prove
+ (`(!x:complex y. vecx x + vecx y = vecx (x + y)) /\
+   (!x x' y y':complex^N. vec0 x y + vec0 x' y' = vec0 (x + x') (y + y')) /\
+   (!x x' y y':complex^N a a'. vec1 x y a + vec1 x' y' a' =
+                               vec1 (x + x') (y + y') (a + a'))`,
+  REPEAT CONJ_TAC THEN REPEAT GEN_TAC THEN
+  REWRITE_TAC[CART_EQ0; MATRIX_ADD_ROW0; DIMINDEX_1;
+              DIMINDEX_TYBIT0; DIMINDEX_TYBIT1] THEN
+  MATCH_MP_TAC FORALL_BINARY_THM THEN
+  SIMP_TAC[VECX_COMPONENT0; VEC0_COMPONENT0_BINARY;
+    VEC1_COMPONENT0_BINARY; MATRIX_ADD_ROW0; NUM_LT_BINARY] THEN
+  MESON_TAC[]);;
+
+let COMPLEX_VECTOR_SUB_ARITH = prove
+ (`(!x:complex y. vecx x - vecx y = vecx (x - y)) /\
+   (!x x' y y':complex^N. vec0 x y - vec0 x' y' = vec0 (x - x') (y - y')) /\
+   (!x x' y y':complex^N a a'. vec1 x y a - vec1 x' y' a' =
+                               vec1 (x - x') (y - y') (a - a'))`,
+  REPEAT CONJ_TAC THEN REPEAT GEN_TAC THEN
+  REWRITE_TAC[CART_EQ0; MATRIX_SUB_ROW0; DIMINDEX_1;
+              DIMINDEX_TYBIT0; DIMINDEX_TYBIT1] THEN
+  MATCH_MP_TAC FORALL_BINARY_THM THEN
+  SIMP_TAC[VECX_COMPONENT0; VEC0_COMPONENT0_BINARY;
+    VEC1_COMPONENT0_BINARY; MATRIX_SUB_ROW0; NUM_LT_BINARY] THEN
+  MESON_TAC[]);;
+
+let COMPLEX_VECTOR_NEG_ARITH = prove
+ (`(!a:complex. --vecx a = vecx (--a)) /\
+   (!x y:complex^N. --vec0 x y = vec0 (--x) (--y)) /\
+   (!x y:complex^N a. --vec1 x y a = vec1 (--x) (--y) (--a))`,
+  REPEAT CONJ_TAC THEN REPEAT GEN_TAC THEN
+  REWRITE_TAC[CART_EQ0; MATRIX_NEG_ROW0; DIMINDEX_1;
+              DIMINDEX_TYBIT0; DIMINDEX_TYBIT1] THEN
+  MATCH_MP_TAC FORALL_BINARY_THM THEN
+  SIMP_TAC[VECX_COMPONENT0; VEC0_COMPONENT0_BINARY;
+    VEC1_COMPONENT0_BINARY; MATRIX_NEG_ROW0; NUM_LT_BINARY] THEN
+  MESON_TAC[]);;
+
+let COMPLEX_VECTOR_CMUL_ARITH = prove
+ (`(!c a:complex. c % vecx a = vecx (c * a)) /\
+   (!c x y:complex^N. c % vec0 x y = vec0 (c % x) (c % y)) /\
+   (!c x y:complex^N a. c % vec1 x y a = vec1 (c % x) (c % y) (c * a))`,
+  REPEAT CONJ_TAC THEN REPEAT GEN_TAC THEN
+  REWRITE_TAC[CART_EQ0; MATRIX_CMUL_ROW0; DIMINDEX_1;
+              DIMINDEX_TYBIT0; DIMINDEX_TYBIT1] THEN
+  MATCH_MP_TAC FORALL_BINARY_THM THEN
+  SIMP_TAC[VECX_COMPONENT0; VEC0_COMPONENT0_BINARY;
+    VEC1_COMPONENT0_BINARY; CVECTOR_MUL_COMPONENT0; NUM_LT_BINARY] THEN
+  MESON_TAC[]);;
+
+let CDOT_ARITH = prove
+ (`(!a b:complex. (vecx a) cdot (vecx b) = a * cnj b) /\
+   (!x x' y y':complex^N. vec0 x y cdot vec0 x' y' = x cdot x' + y cdot y') /\
+   (!x x' y y':complex^N a b.
+      vec1 x y a cdot vec1 x' y' b = x cdot x' + y cdot y' + a * cnj b)`,
+  REWRITE_TAC[CDOT0] THEN CONJ_TAC THENL
+  [REWRITE_TAC[VECX_COMPONENT0; DIMINDEX_1; VSUM_NUMSEG_LT]; ALL_TAC] THEN
+  REWRITE_TAC[DIMINDEX_TYBIT0; DIMINDEX_TYBIT1; VSUM_NUMSEG_LT] THEN
+  SIMP_TAC[VSUM_EQ; FORALL_IN_GSPEC;
+           VEC0_COMPONENT0_BINARY; VEC1_COMPONENT0_BINARY;
+           LE_REFL; LT_IMP_LE; ARITH_RULE `i:num < n ==> ~(i = n)`;
+           COMPLEX_ADD_AC]);;

@@ -1,0 +1,15 @@
+(* ========================================================================= *)
+(* Extras                                                                    *)
+(* ========================================================================= *)
+
+needs "finvec/make.hl";;
+
+loadt "finvec/finlambda.hl";;
+
+let loade s = loadt ("finvec/Extras/" ^ s);;
+
+loade "finvec_extras.hl";;    (* Minor addition to finvec.hl                *)
+loade "misc_extras.hl";;      (* Extra miscellanea.                         *)
+loade "compvec.hl";;          (* Use COMPUTE_CONV to comp. vec. components  *)
+loade "vconstr.hl";;          (* Concrete vectors `vector[x1,...,xN]`       *)
+loade "numinterval.hl";;      (* Intervals m <= i /\ i <= n                 *)

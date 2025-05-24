@@ -1,0 +1,28 @@
+(* ========================================================================= *)
+(* Ad hoc encoding for finite types ("fintypes") and for vectors indexed by  *)
+(* finite types ("finvectors").                                              *)
+(*                                                                           *)
+(* Load library with tests and extra stuff.                                  *)
+(*                                                                           *)
+(* (c) Copyright, Andrea Gabrielli, Marco Maggesi 2017-2018                  *)
+(* ========================================================================= *)
+
+let already_loaded s =
+  let s' = try file_on_path (!load_path) s
+           with Not_found -> "" in
+  if s' = "" then false else
+  let fileid = (Filename.basename s',Digest.file s') in
+  List.mem fileid (!loaded_files);;
+
+loadt (if already_loaded "Multivariate/complexes.ml"
+       then "finvec/make_complex.hl"
+       else "finvec/make.hl");;
+         
+loadt "finvec/finvec_test.hl";;
+loadt "finvec/demo.hl";;
+loadt "finvec/Extras/make_extras.hl";;
+
+report (if already_loaded "Multivariate/complexes.ml"
+        then "Complex vector tested."
+        else "Complex vectors untested.");;
+report "Finished loading vector library, tests and extra stuff.";;

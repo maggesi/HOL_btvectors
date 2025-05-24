@@ -1,0 +1,207 @@
+let BINARY_LT_THEN = prove
+ (`(!n. 0 < n <=> (?p. n = 2 * p /\ 0 < p) \/
+                  (?p. n = 2 * p + 1 /\ p < n)) /\
+   (!m n. 2 * m < n <=> (m = 0 /\ 0 < n) \/
+                        (?p. n = 2 * p /\ 0 < p /\ m < p) \/
+                        (?p. n = 2 * p + 1 /\ m <= p)) /\
+   (!m n. 2 * m + 1 < n <=> (?p. n = 2 * p /\ 0 < p /\ m < p) \/
+                            (?p. n = 2 * p + 1 /\ m < p))`,
+  REPEAT CONJ_TAC THEN TRY (FIX_TAC "m") THEN
+  MATCH_MP_TAC FORALL_BINARY_THM THEN
+  REWRITE_TAC[NUM_EQ_BINARY; NUM_LT_BINARY; UNWIND_THM1] THEN ARITH_TAC);;
+
+let BINARY_LE_THEN = prove
+ (`(!n. 0 <= n <=> n = 0 \/
+                   (?p. n = 2 * p /\ 0 < p) \/
+                   (?p. n = 2 * p + 1 /\ p <= n)) /\
+   (!m n. 2 * m <= n <=> (m = 0 /\ 0 <= n) \/
+                         (?p. n = 2 * p /\ 0 < p /\ m <= p) \/
+                         (?p. n = 2 * p + 1 /\ m <= p)) /\
+   (!m n. 2 * m + 1 <= n <=> (?p. n = 2 * p /\ 0 < p /\ m < p) \/
+                             (?p. n = 2 * p + 1 /\ m <= p))`,
+  REPEAT CONJ_TAC THEN TRY (FIX_TAC "m") THEN
+  MATCH_MP_TAC FORALL_BINARY_THM THEN
+  REWRITE_TAC[NUM_EQ_BINARY; NUM_LE_BINARY; UNWIND_THM1] THEN ARITH_TAC);;
+
+let BINARY_GT_THAN = prove
+ (`(!m. ~(m < 0)) /\
+   (!m n. m < 2 * n <=> (m = 0 /\ 0 < n) \/
+                        (?p. m = 2 * p /\ 0 < p /\ p < n) \/
+                        (?p. m = 2 * p + 1 /\ p < n)) /\
+   (!m n. m < 2 * n + 1 <=> m = 0 \/
+                            (?p. m = 2 * p /\ 0 < p /\ p <= n) \/
+                            (?p. m = 2 * p + 1 /\ p < n))`,
+  REPEAT CONJ_TAC THEN MATCH_MP_TAC FORALL_BINARY_THM THEN
+  REWRITE_TAC[NUM_EQ_BINARY; NUM_LT_BINARY; UNWIND_THM1] THEN ARITH_TAC);;
+
+let BINARY_GE_THAN = prove
+ (`(!m. m <= 0 <=> m = 0) /\
+   (!m n. m <= 2 * n <=> (m = 0 /\ 0 <= n) \/
+                         (?p. m = 2 * p /\ 0 < p /\ p <= n) \/
+                         (?p. m = 2 * p + 1 /\ p < n)) /\
+   (!m n. m <= 2 * n + 1<=> m = 0 \/
+                            (?p. m = 2 * p /\ 0 < p /\ p <= n) \/
+                            (?p. m = 2 * p + 1 /\ p <= n))`,
+  REPEAT CONJ_TAC THEN MATCH_MP_TAC FORALL_BINARY_THM THEN
+  REWRITE_TAC[NUM_EQ_BINARY; NUM_LE_BINARY; UNWIND_THM1] THEN ARITH_TAC);;
+
+let BINARY_EQ = REWRITE_RULE [] (CONV_RULE BITS_ELIM_CONV ARITH_EQ);;
+let BINARY_LT = REWRITE_RULE [] (CONV_RULE BITS_ELIM_CONV ARITH_LT);;
+let BINARY_LE = REWRITE_RULE [] (CONV_RULE BITS_ELIM_CONV ARITH_LE);;
+
+let FORALL_BINARY_CASES = prove
+ (`(!n. P n) <=>
+   P 0 /\
+   (!n. 0 < n ==> P (2 * n)) /\
+   (!n. P (2 * n + 1))`,
+  EQ_TAC THENL [SIMP_TAC[]; ALL_TAC] THEN STRIP_TAC THEN GEN_TAC THEN
+  STRUCT_CASES_TAC (SPEC `n:num` NUM_BINARY_CASES_STRONG) THEN ASM_SIMP_TAC[]);;
+
+(*
+let BINARY_LT_THEN = prove
+ (`(!n. 0 < n <=> (?p. n = 2 * p /\ 0 < p) \/
+                  (?p. n = 2 * p + 1 /\ p < n)) /\
+   (!m n. 2 * m < n <=> (m = 0 /\ 0 < n) \/
+                        (?p. n = 2 * p /\ 0 < p /\ m < p) \/
+                        (?p. n = 2 * p + 1 /\ m <= p)) /\
+   (!m n. 2 * m + 1 < n <=> (?p. n = 2 * p /\ 0 < p /\ m < p) \/
+                            (?p. n = 2 * p + 1 /\ m < p))`,
+  REPEAT CONJ_TAC THEN TRY (FIX_TAC "m") THEN
+  GEN_REWRITE_TAC I [FORALL_BINARY_CASES] THEN
+  REWRITE_TAC[BINARY_EQ; BINARY_LT; UNWIND_THM1] THEN ARITH_TAC);;
+
+let BINARY_LE_THEN = prove
+ (`(!n. 0 <= n <=> n = 0 \/
+                   (?p. n = 2 * p /\ 0 < p) \/
+                   (?p. n = 2 * p + 1 /\ p <= n)) /\
+   (!m n. 2 * m <= n <=> (m = 0 /\ 0 <= n) \/
+                         (?p. n = 2 * p /\ 0 < p /\ m <= p) \/
+                         (?p. n = 2 * p + 1 /\ m <= p)) /\
+   (!m n. 2 * m + 1 <= n <=> (?p. n = 2 * p /\ 0 < p /\ m < p) \/
+                             (?p. n = 2 * p + 1 /\ m <= p))`,
+  REPEAT CONJ_TAC THEN TRY (FIX_TAC "m") THEN
+  GEN_REWRITE_TAC I [FORALL_BINARY_CASES] THEN
+  REWRITE_TAC[BINARY_EQ; BINARY_LT; UNWIND_THM1] THEN ARITH_TAC);;
+
+let BINARY_GT_THAN = prove
+ (`(!m. ~(m < 0)) /\
+   (!m n. m < 2 * n <=> (m = 0 /\ 0 < n) \/
+                        (?p. m = 2 * p /\ 0 < p /\ p < n) \/
+                        (?p. m = 2 * p + 1 /\ p < n)) /\
+   (!m n. m < 2 * n + 1 <=> m = 0 \/
+                            (?p. m = 2 * p /\ 0 < p /\ p <= n) \/
+                            (?p. m = 2 * p + 1 /\ p < n))`,
+  REPEAT CONJ_TAC THEN GEN_REWRITE_TAC I [FORALL_BINARY_CASES] THEN
+  REWRITE_TAC[BINARY_EQ; BINARY_LT; UNWIND_THM1] THEN ARITH_TAC);;
+
+let BINARY_GE_THAN = prove
+ (`(!m. m <= 0 <=> m = 0) /\
+   (!m n. m <= 2 * n <=> (m = 0 /\ 0 <= n) \/
+                         (?p. m = 2 * p /\ 0 < p /\ p <= n) \/
+                         (?p. m = 2 * p + 1 /\ p < n)) /\
+   (!m n. m <= 2 * n + 1<=> m = 0 \/
+                            (?p. m = 2 * p /\ 0 < p /\ p <= n) \/
+                            (?p. m = 2 * p + 1 /\ p <= n))`,
+  REPEAT CONJ_TAC THEN GEN_REWRITE_TAC I [FORALL_BINARY_CASES] THEN
+  REWRITE_TAC[BINARY_EQ; BINARY_LE; UNWIND_THM1] THEN TRY ARITH_TAC);;
+*)
+
+let FORALL_LT_BINARY = prove
+ (`(!i. i < 0 ==> P i) /\
+   (!n. (!i. i < 2 * n ==> P i) <=>
+        (!i. i < n ==> P (2 * i)) /\
+        (!i. i < n ==> P (2 * i + 1))) /\
+   (!n. (!i. i < 2 * n + 1 ==> P i) <=>
+        P 0 /\
+        (!i. i <= n ==> P (2 * i)) /\
+        (!i. i < n ==> P (2 * i + 1)))`,
+   REWRITE_TAC[BINARY_GT_THAN] THEN CONJ_TAC THEN GEN_TAC THEN
+   (EQ_TAC THENL
+     [DISCH_TAC THEN REPEAT STRIP_TAC THEN FIRST_X_ASSUM MATCH_MP_TAC THEN
+      REWRITE_TAC[BINARY_EQ; UNWIND_THM1] THEN ASM_ARITH_TAC
+      ;
+      REPEAT STRIP_TAC THEN REPEAT (FIRST_X_ASSUM SUBST_VAR_TAC) THEN
+      ASM_SIMP_TAC[]]) THEN
+   ASM_MESON_TAC[ARITH_RULE `0 = 2 * 0`]);;
+
+let FORALL_LE_BINARY = prove
+ (`((!i. i <= 0 ==> P i) <=> P 0) /\
+   (!n. (!i. i <= 2 * n ==> P i) <=>
+        (!i. i <= n ==> P (2 * i)) /\
+        (!i. i <  n ==> P (2 * i + 1))) /\
+   (!n. (!i. i <= 2 * n + 1 ==> P i) <=>
+        P 0 /\
+        (!i. i <= n ==> P (2 * i)) /\
+        (!i. i <= n ==> P (2 * i + 1)))`,
+   REWRITE_TAC[BINARY_GE_THAN] THEN
+   CONJ_TAC THENL [MESON_TAC[]; ALL_TAC] THEN
+   CONJ_TAC THEN GEN_TAC THEN
+   (EQ_TAC THENL
+     [DISCH_TAC THEN REPEAT STRIP_TAC THEN FIRST_X_ASSUM MATCH_MP_TAC THEN
+      REWRITE_TAC[BINARY_EQ; UNWIND_THM1] THEN
+      ASM_ARITH_TAC
+      ;
+      REPEAT STRIP_TAC THEN REPEAT (FIRST_X_ASSUM SUBST_VAR_TAC) THEN
+      ASM_SIMP_TAC[]]) THEN
+   ASM_MESON_TAC[ARITH_RULE `0 = 2 * 0`]);;
+
+(*
+let FORALL_LT_ARITH = prove
+ (`(!n. (!i. i < NUMERAL n ==> P i) <=> (!i. i < n ==> P (NUMERAL i))) /\
+   (!i. i < _0 ==> P i) /\
+   (!n. (!i. i < BIT0 n ==> P i) <=>
+        (!i. i < n ==> P (BIT0 i)) /\
+        (!i. i < n ==> P (BIT1 i))) /\
+   (!n. (!i. i < BIT1 n ==> P i) <=>
+        P _0 /\
+        (!i. i <= n ==> P (BIT0 i)) /\
+        (!i. i <  n ==> P (BIT1 i)))`,
+  CONV_TAC BITS_ELIM_CONV THEN REWRITE_TAC[FORALL_LT_BINARY]);;
+*)
+
+let FORALL_LE_ARITH = prove
+ (`(!n. (!i. i <= NUMERAL n ==> P i) <=> (!i. i <= n ==> P (NUMERAL i))) /\
+   ((!i. i <= _0 ==> P i) <=> P _0) /\
+   (!n. (!i. i <= BIT0 n ==> P i) <=>
+        (!i. i <= n ==> P (BIT0 i)) /\
+        (!i. i <  n ==> P (BIT1 i))) /\
+   (!n. (!i. i <= BIT1 n ==> P i) <=>
+        P _0 /\
+        (!i. i <= n ==> P (BIT0 i)) /\
+        (!i. i <= n ==> P (BIT1 i)))`,
+  CONV_TAC BITS_ELIM_CONV THEN REWRITE_TAC[FORALL_LE_BINARY]);;
+
+(*
+prove
+ (`!x. x < 5 ==> x = 0 \/ x = 1 \/ x = 2 \/ x = 3 \/ x = 4`,
+  REWRITE_TAC[CONJUNCT1 FORALL_LT_ARITH] THEN
+  REWRITE_TAC[CONJUNCT2 FORALL_LT_ARITH; CONJUNCT2 FORALL_LE_ARITH] THEN
+  REWRITE_TAC[ARITH_ZERO]);;
+
+prove
+ (`!x. x < 10 ==> x = 0 \/ x = 1 \/ x = 2 \/ x = 3 \/ x = 4 \/
+                  x = 5 \/ x = 6 \/ x = 7 \/ x = 8 \/ x = 9`,
+  REWRITE_TAC[CONJUNCT1 FORALL_LT_ARITH] THEN
+  REWRITE_TAC[CONJUNCT2 FORALL_LT_ARITH; CONJUNCT2 FORALL_LE_ARITH] THEN
+  REWRITE_TAC[ARITH_ZERO]);;
+*)
+
+let FORALL_LT_ARITH = prove
+ (`(!n. (!i. i < NUMERAL n ==> P i) <=> (!i. i < n ==> P (NUMERAL i))) /\
+   (!i. i < _0 ==> P i) /\
+   (!n. (!i. i < BIT0 n ==> P i) <=>
+        (!i. i < n ==> P (BIT0 i)) /\
+        (!i. i < n ==> P (BIT1 i))) /\
+   (!n. (!i. i < BIT1 n ==> P i) <=>
+        P _0 /\
+        (!i. i < n ==> P (BIT0 (SUC i))) /\
+        (!i. i <  n ==> P (BIT1 i)))`,
+  CONV_TAC BITS_ELIM_CONV THEN REWRITE_TAC[FORALL_LT_BINARY] THEN
+  GEN_TAC THEN EQ_TAC THEN STRIP_TAC THEN ASM_REWRITE_TAC[] THENL
+  [ASM_MESON_TAC[ARITH_RULE `i < n ==> SUC i <= n`]; ALL_TAC] THEN
+  GEN_TAC THEN DISCH_TAC THEN ASM_CASES_TAC `i = 0` THEN
+  ASM_REWRITE_TAC[NUM_MULT_CONV `2 * 0`] THEN
+  ASM_METIS_TAC[ARITH_RULE `~(i = 0) /\ i <= n ==> i = SUC (i - 1) /\ i - 1 < n`]);;
+
+REWRITE_CONV[FORALL_LT_ARITH; FORALL_LE_ARITH; ARITH_SUC; GSYM CONJ_ASSOC]
+`!i. i < 50 ==> P i`;;

@@ -1,0 +1,59 @@
+(* ========================================================================= *)
+(* Extras for finvec.hl.                                                     *)
+(* ========================================================================= *)
+
+(* ------------------------------------------------------------------------- *)
+(* has_vector_component.                                                     *)
+(* ------------------------------------------------------------------------- *)
+
+parse_as_infix("has_vector_component",(12,"right"));;
+
+let has_vector_component = new_definition
+  `(v:A^N has_vector_component x) i <=>
+   1 <= i /\ i <= dimindex(:N) /\ v$i = x`;;
+
+let HAS_VECTOR_COMPONENT_COMPONENT0 = prove
+ (`!v:A^N x i. (v has_vector_component x) i <=>
+               1 <= i /\ (v has_vector_component0 x) (i - 1)`,
+  REWRITE_TAC[has_vector_component; has_vector_component0] THEN
+  REPEAT GEN_TAC THEN ASM_CASES_TAC `1 <= i` THEN ASM_REWRITE_TAC[] THEN
+  ASM_SIMP_TAC[INDEX_EQ_COMPONENT0;
+    ARITH_RULE `1 <= i ==> (i - 1 < n <=> i <= n)`]);;
+
+let HAS_VECTOR_COMPONENT_ZERO = prove
+ (`!v:A^N x. ~(v has_vector_component x) 0`,
+  REWRITE_TAC[has_vector_component] THEN NUM_REDUCE_TAC);;
+
+let HAS_VECTOR_COMPONENT_BINARY = prove
+ (`(!x:A^N b. ~(x has_vector_component b) 0) /\
+   (!a b:A i. (vecx a has_vector_component b) i <=> i = 1 /\ a = b) /\
+   (!x y:A^N b i.
+      (vec0 x y has_vector_component b) (2 * i) <=>
+      0 < i /\ (y has_vector_component b) i) /\
+   (!x y:A^N b i.
+      (vec0 x y has_vector_component b) (2 * i + 1) <=>
+      (x has_vector_component b) (i + 1)) /\
+   (!x y:A^N a b i.
+      (vec1 x y a has_vector_component b) (2 * i) <=>
+      0 < i /\ (y has_vector_component b) i) /\
+   (!x y:A^N a b i.
+      (vec1 x y a has_vector_component b) (2 * i + 1) <=>
+      if i = dimindex(:N) then a = b else
+      (x has_vector_component b) (i + 1))`,
+  REWRITE_TAC[HAS_VECTOR_COMPONENT_ZERO] THEN
+  REPEAT CONJ_TAC THEN REPEAT GEN_TAC THEN
+  REWRITE_TAC[HAS_VECTOR_COMPONENT_COMPONENT0; HAS_VECTOR_COMPONENT0_BINARY;
+              NUM_LT_BINARY; ARITH_RULE `1 <= n <=> 0 < n`;
+              ARITH_RULE `(2 * i + 1) - 1 = 2 * i`] THEN
+  ASM_CASES_TAC `0 < i` THEN ASM_REWRITE_TAC[] THEN
+  REWRITE_TAC[ARITH_RULE `(j + 1) - 1 = j`] THENL
+  [ASM_CASES_TAC `a:A = b` THEN ASM_REWRITE_TAC[] THEN ASM_ARITH_TAC;
+   ASM_ARITH_TAC;
+   CLAIM_TAC "@j. i" `?j. i = j + 1` THENL
+   [EXISTS_TAC `i - 1` THEN ASM_ARITH_TAC; POP_ASSUM SUBST1_TAC] THEN
+   REWRITE_TAC[ARITH_RULE `2 * (j + 1) - 1 = 2 * j + 1`] THEN
+   REWRITE_TAC[HAS_VECTOR_COMPONENT0_BINARY; ARITH_RULE `(j + 1) - 1 = j`];
+   CLAIM_TAC "@j. i" `?j. i = j + 1` THENL
+   [EXISTS_TAC `i - 1` THEN ASM_ARITH_TAC; POP_ASSUM SUBST1_TAC] THEN
+   REWRITE_TAC[ARITH_RULE `2 * (j + 1) - 1 = 2 * j + 1`] THEN
+   REWRITE_TAC[HAS_VECTOR_COMPONENT0_BINARY; ARITH_RULE `(j + 1) - 1 = j`]]);;

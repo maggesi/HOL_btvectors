@@ -1,0 +1,174 @@
+needs "misc.hl";;
+needs "fintypes.hl";;
+needs "syntax.hl";;
+
+(* ------------------------------------------------------------------------- *)
+(* Tests.                                                                    *)
+(* ------------------------------------------------------------------------- *)
+
+(*;;
+mk_finty num_0;;
+mk_finty num_1;;
+mk_finty num_2;;
+mk_finty (Int 3);;
+mk_finty (Int 4);;
+mk_finty (Int 5);;
+mk_finty (Int 6);;
+
+mk_prefinty num_0;;
+mk_prefinty num_1;;
+mk_prefinty num_2;;
+mk_prefinty (Int 3);;
+mk_prefinty (Int 4);;
+mk_prefinty (Int 5);;
+mk_prefinty (Int 6);;
+
+dest_finty (mk_finty (Int 5));;
+dest_finty (mk_finty (Int 17));;
+*)
+
+DIMINDEX_CONV `dimindex(s:1->bool)`;;
+DIMINDEX_CONV `dimindex(s:2->bool)`;;
+DIMINDEX_CONV `dimindex(s:3->bool)`;;
+DIMINDEX_CONV `dimindex(s:4->bool)`;;
+
+(* ------------------------------------------------------------------------- *)
+
+let SUDOKU = new_definition
+  `SUDOKU (s:N#N->N#N->N#N) <=>
+     (!i1 i2 j. s i1 j = s i2 j ==> i1 = i2) /\
+     (!i j1 j2. s i j1 = s i j2 ==> j1 = j2) /\
+     (!u v x y z w. s (u,x) (v,y) = s (u,z) (v,w) ==> x = z /\ y = w)`;;
+
+(* ------------------------------------------------------------------------- *)
+;;
+
+let FORALL_IN_NUMINTERVAL_CONV : conv =
+  let pth_intro = prove
+   (`(!i. m <= i /\ i <= n ==> P i) <=> (!i. i IN m..n ==> P i)`,
+    REWRITE_TAC[numseg] THEN SET_TAC[])
+  and pth0,pth1 = (CONJ_PAIR o prove)
+   (`((!i:num. i IN {} ==> P i) <=> T) /\
+     ((!i:num. i IN {a} ==> P i) <=> P a)`,
+    REWRITE_TAC[FORALL_IN_INSERT; NOT_IN_EMPTY]) in
+  REWR_CONV pth_intro THENC
+  (BINDER_CONV o LAND_CONV o RAND_CONV) NUMSEG_CONV THENC
+  (REWR_CONV pth0 ORELSEC
+   GEN_REWRITE_CONV TOP_DEPTH_CONV [FORALL_IN_INSERT; pth1]);;
+
+(* Example
+;;
+FORALL_IN_NUMINTERVAL_CONV `!i. 2 <= i /\ i <= 5 ==> P i`;;
+FORALL_IN_NUMINTERVAL_CONV `!i. 4 <= i /\ i <= 1 ==> P i`;;
+FORALL_IN_NUMINTERVAL_CONV `!i. 3 <= i /\ i <= 3 ==> P i`;;
+*)
+
+(* ------------------------------------------------------------------------- *)
+(* Example: Equality between dwords.                                         *)
+(* ------------------------------------------------------------------------- *)
+
+(GEN_REWRITE_CONV I [CART_EQ] THENC ONCE_DEPTH_CONV DIMINDEX_CONV THENC
+ FORALL_IN_NUMINTERVAL_CONV)
+`x:bool^32 = y`;;
+
+parse_as_infix("orb",(16,"right"));;
+parse_as_infix("andb",(20,"right"));;
+
+let andb = new_definition
+  `((x:bool^N) andb (y:bool^N)):bool^N = lambda i. x$i /\ y$i`;;
+
+let orb = new_definition
+  `((x:bool^N) orb (y:bool^N)):bool^N = lambda i. x$i \/ y$i`;;
+
+new_type_abbrev("dword",`:bool^32`);;
+
+let shr = new_definition
+  `shr (x:bool^N):bool^N = lambda i. if i = 1 then F else x$(i-1)`;;
+
+let SHR = prove
+ (`(!x:bool^N. shr x$1 = F) /\
+   (!x:bool^N i. 2 <= i /\ i <= dimindex(:N) ==> shr x$i = x$(i-1))`,
+  CONJ_TAC THEN REPEAT GEN_TAC THEN REWRITE_TAC[shr] THEN
+  SIMP_TAC[LAMBDA_BETA; DIMINDEX_GE_1; LE_REFL;
+           ARITH_RULE `2 <= i ==> 1 <= i /\ ~(i = 1)`]);;
+
+(*
+let VECTOR_EXPAND_CONV : conv;;
+
+seq_of_list;;
+list_of_seq
+;;
+*)
+
+let VECTOR_EXPAND_LIST_OF_SEQ = prove
+ (`!v:A^N. v = vector(list_of_seq (\i. v$(SUC i)) (dimindex (:N)))`,
+  GEN_TAC THEN REWRITE_TAC[CART_EQ] THEN
+  SIMP_TAC[VECTOR_COMPONENT; EL_LIST_OF_SEQ;
+    ARITH_RULE `1 <= i /\ i <= dimindex(:N) ==> i - 1 < dimindex(:N)`;
+    ARITH_RULE `1 <= i ==> SUC (i - 1) = i`]);;
+
+(* ------------------------------------------------------------------------- *)
+
+let VECX_DEF = new_definition
+  `vecx a:A^1 = lambda i. a`;;
+
+let VECX_COMPONENTS = prove
+ (`vecx a$1 = a:A`,
+  SIMP_TAC[VECX_DEF; LAMBDA_BETA; DIMINDEX_CONV `dimindex(:1)`; LE_REFL]);;
+
+let example = prove
+ (`<|1;2;3|> = vec1 (vecx 1) (vecx 2) 3`,
+ REWRITE_TAC[CART_EQ] THEN SIMP_TAC[VECTOR_COMPONENT] THEN
+ DIMINDEX_TAC THEN CONV_TAC FORALL_IN_NUMINTERVAL_CONV THEN
+ NUM_REDUCE_TAC THEN REWRITE_TAC[EL; HD; TL; ONE; TWO] THEN
+ NUM_REDUCE_TAC THEN
+ SUBGOAL_THEN `3 = 2 * dimindex(:1) + 1` SUBST1_TAC THENL
+ [DIMINDEX_TAC THEN NUM_REDUCE_TAC; ALL_TAC] THEN
+ SIMP_TAC[VEC1_COMPONENTS] THEN DIMINDEX_TAC THEN NUM_REDUCE_TAC THEN
+ SIMP_TAC[VEC1_COMPONENTS; LE_REFL; DIMINDEX_CONV `dimindex(:1)`;
+          ARITH_RULE `1 + 1 <= 2`; ARITH_RULE `2 <= 2 * 1`] THEN
+ NUM_REDUCE_TAC THEN
+ REWRITE_TAC[VECX_COMPONENTS] THEN ARITH_TAC);;
+
+let thm1 = prove
+ (`!c i x y:A^N. (1 <= i /\ i <= dimindex(:N) /\ x$i = c) ==>
+  (1 <= i /\ i <= dimindex(:N tybit0) /\ vec0 x y$i = c)`,
+ REPEAT GEN_TAC THEN INTRO_TAC "ilt igt xi" THEN
+ ASM_SIMP_TAC[DIMINDEX_TYBIT0; ARITH_RULE`!i a. i <= a ==> i <= 2 * a`;
+              VEC0_COMPONENTS]);;
+
+let thm2 = prove
+ (`!c i x y:A^N.(1 <= i /\ i <= dimindex(:N) /\ y$i = c)
+                ==> (!j. j = i + dimindex(:N)
+                         ==> 1 <= j /\ j <= dimindex(:N tybit0) /\
+                             vec0 x y$j = c)`,
+ REPEAT GEN_TAC THEN INTRO_TAC "ilt igt xi" THEN
+ ASM_SIMP_TAC[DIMINDEX_TYBIT0; VEC0_COMPONENTS;
+              ARITH_RULE`!i a. 1 <= i /\ i <= a
+                               ==>  a + 1 <= i + a /\ i + a <= 2 * a`;
+              ARITH_RULE`!x y:num. (x + y) - y = x`] THEN
+ ASM_ARITH_TAC);;
+
+let thm3 = prove
+ (`!a c i x y:A^N.
+   (1 <= i /\ i <= dimindex(:N) /\ x$i = c) ==>
+   (1 <= i /\ i <= dimindex(:N tybit1) /\ vec1 x y a$i = c)`,
+ REPEAT GEN_TAC THEN INTRO_TAC "ilt igt xi" THEN
+ ASM_SIMP_TAC[DIMINDEX_TYBIT1; ARITH_RULE`!i a. i <= a ==> i <= 2 * a + 1`;
+              VEC1_COMPONENTS]);;
+
+let thm4 = prove
+ (`!a c i x y:A^N.
+   (1 <= i /\ i <= dimindex(:N) /\ y$i = c) ==>
+   (!j. j = i + dimindex(:N)
+        ==> 1 <= j /\ j <= dimindex(:N tybit1) /\ vec1 x y a$j = c)`,
+ REPEAT GEN_TAC THEN INTRO_TAC "ilt igt xi" THEN
+ ASM_SIMP_TAC[DIMINDEX_TYBIT1; VEC1_COMPONENTS;
+              ARITH_RULE`!i a. 1 <= i /\ i <= a
+                               ==>  a + 1 <= i + a /\ i + a <= 2 * a`;
+              ARITH_RULE`!x y:num. (x + y) - y = x`] THEN
+ ASM_ARITH_TAC);;
+
+let thm5 = prove
+ (`!a x y:A^N j. j = dimindex(:N tybit1) ==> vec1 x y a$j = a`,
+  SIMP_TAC[VEC1_COMPONENTS; DIMINDEX_TYBIT1]);;

@@ -1,0 +1,93 @@
+(* ========================================================================= *)
+(* Material moved here from misc.hl because obsolete or unloved/unused.      *)
+(*                                                                           *)
+(* (c) Copyright, Andrea Gabrielli, Marco Maggesi 2017-2018                  *)
+(* ========================================================================= *)
+
+(* ------------------------------------------------------------------------- *)
+(* More about cardinality.                                                   *)
+(* ------------------------------------------------------------------------- *)
+
+let FINITE_OPTION = prove
+ (`FINITE (:A option) <=> FINITE (:A)`,
+  SUBGOAL_THEN `(:A option) = NONE INSERT IMAGE SOME (:A)` SUBST1_TAC THENL
+  [SET_TAC[cases "option"];
+   REWRITE_TAC[FINITE_INSERT] THEN
+   SIMP_TAC[FINITE_IMAGE_INJ_EQ; injectivity "option"]]);;
+
+let CARD_OPTION = prove
+ (`FINITE (:A) ==> CARD (:A option) = CARD (:A) + 1`,
+  SUBGOAL_THEN `(:A option) = NONE INSERT IMAGE SOME (:A)` SUBST1_TAC THENL
+  [SET_TAC[cases "option"];
+   SIMP_TAC[CARD_CLAUSES; FINITE_IMAGE] THEN
+   REWRITE_TAC[IN_IMAGE; distinctness "option"] THEN
+   SIMP_TAC[CARD_IMAGE_INJ; injectivity "option"] THEN ARITH_TAC]);;
+
+let FINITE_SUM = prove
+ (`FINITE(:A + B) <=> FINITE (:A) /\ FINITE (:B)`,
+  SUBGOAL_THEN `(:A + B) = IMAGE INL (:A) UNION IMAGE INR (:B)`
+    SUBST1_TAC THENL
+  [SET_TAC[sum_CASES];
+   REWRITE_TAC[FINITE_UNION] THEN
+   SIMP_TAC[FINITE_IMAGE_INJ_EQ; sum_INJECTIVE]]);;
+
+let CARD_SUM = prove
+ (`FINITE (:A) /\ FINITE (:B) ==> CARD (:A + B) = CARD (:A) + CARD (:B)`,
+  STRIP_TAC THEN
+  SUBGOAL_THEN `(:A + B) = IMAGE INL (:A) UNION IMAGE INR (:B)`
+    SUBST1_TAC THENL
+  [SET_TAC[sum_CASES]; ALL_TAC] THEN
+  SUBGOAL_THEN `IMAGE INL (:A) INTER IMAGE INR (:B) = {}`
+    (fun th -> ASM_SIMP_TAC[th; CARD_UNION; FINITE_IMAGE]) THENL
+  [SET_TAC[sum_DISTINCT]; ASM_SIMP_TAC[CARD_IMAGE_INJ; sum_INJECTIVE]]);;
+
+(* ------------------------------------------------------------------------- *)
+(* Lemma about iteration.                                                    *)
+(* ------------------------------------------------------------------------- *)
+
+(*
+let ITER_BINARY_CLAUSES =
+ (`(!f x:A. ITER 0 f x = x) /\
+   (!n f x:A. ITER (2 * n) f x = ITER n f (ITER n f x)) /\
+   (!n f x:A. ITER (2 * n + 1) f x = ITER n f (ITER n f (f x)))`,
+  REWRITE_TAC[ITER_ADD; GSYM ITER_ALT] THEN
+  REWRITE_TAC[ITER_alt; GSYM ITER_ADD; GSYM ITER_MUL; ITER_1]
+*)
+
+(* ------------------------------------------------------------------------- *)
+(* Lemmata about the constructor `vector`.                                   *)
+(* ------------------------------------------------------------------------- *)
+
+let VECTOR_COMPONENT = prove
+ (`!l i. 1 <= i /\ i <= dimindex(:B) ==> (vector l:A^B)$i = EL (i - 1) l`,
+  REWRITE_TAC[vector] THEN ASM_SIMP_TAC[LAMBDA_BETA]);;
+
+let VECTOR_INJ_EQ = prove
+ (`!l1 l2.
+     vector l1 = vector l2:A^N <=>
+     (!i. 1 <= i /\ i <= dimindex(:N) ==> EL (i - 1) l1 = EL (i - 1) l2)`,
+  REWRITE_TAC[CART_EQ] THEN SIMP_TAC[VECTOR_COMPONENT]);;
+
+(* TODO: Delete, not needed. *)
+let VECTOR_INJ = prove
+ (`!l1 l2.
+     vector l1 = vector l2:A^N
+     ==> !i. 1 <= i /\ i <= dimindex(:N) ==> EL (i - 1) l1 = EL (i - 1) l2`,
+  REWRITE_TAC[VECTOR_INJ_EQ]);;
+
+(* ------------------------------------------------------------------------- *)
+(* Quantifying on vector over fintypes.                                      *)
+(* ------------------------------------------------------------------------- *)
+
+(* TODO: Delete, not needed. *)
+let VECTOR_CASES = prove
+ (`!v:A^B. ?l. LENGTH l = dimindex(:B) /\ v = vector l`,
+  GEN_TAC THEN EXISTS_TAC `list_of_seq (\i. (v:A^B)$(i+1)) (dimindex(:B))` THEN
+  REWRITE_TAC[LENGTH_LIST_OF_SEQ; CART_EQ] THEN SIMP_TAC[VECTOR_COMPONENT] THEN
+  REPEAT STRIP_TAC THEN IMP_REWRITE_TAC[EL_LIST_OF_SEQ] THEN
+  CONJ_TAC THENL [AP_TERM_TAC; ALL_TAC] THEN ASM_ARITH_TAC);;
+
+(* TODO: Delete, not needed. *)
+let FORALL_VECTOR = prove
+ (`!P. (!v:A^B. P v) <=> (!l. LENGTH l = dimindex(:B) ==> P (vector l))`,
+  MESON_TAC[VECTOR_CASES]);;

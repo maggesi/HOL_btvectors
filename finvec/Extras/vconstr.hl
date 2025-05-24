@@ -1,0 +1,161 @@
+(* ========================================================================= *)
+(* Various tools and theorems for the constructor `vector:(A)list->A^N`.     *)
+(* ========================================================================= *)
+
+(* ------------------------------------------------------------------------- *)
+(* Parser for concrete vectors.                                              *)
+(*                                                                           *)
+(* Tweak the HOL Light parser so that it can infer the type of terms of      *)
+(* the form `vector[x1;...;xN]`.  See examples below.                        *)
+(* ------------------------------------------------------------------------- *)
+
+let mk_small_prefinty n = mk_prefinty (Num.num_of_int n);;
+
+let pmk_vector =
+  let new_type_var =
+    let tyv_num = ref (-1) in
+    fun () -> let n = !tyv_num in (tyv_num := pred n; Stv(n))
+  and pmk_list els =
+    itlist (fun x y -> Combp(Combp(Varp("CONS",dpty),x),y))
+           els (Varp("NIL",dpty))
+  and vector_ptm = Varp("vector",dpty) in
+  fun l ->
+    let fty = mk_small_prefinty (length l)
+    and sty = new_type_var () in
+    Combp
+     (Typing (vector_ptm,
+       Ptycon ("fun", [Ptycon ("list", [sty]); Ptycon ("cart", [sty; fty])])),
+     pmk_list l);;
+
+let parse_vector =
+  let parse_seq = elistof parse_preterm (a (Resword ";")) "term" in
+  let parse_vec = parse_seq >> pmk_vector in
+  let prefix = function Ident "vector" :: Resword "[" :: rest -> (),rest
+                      | _ -> raise Noparse in
+  (prefix ++ parse_vec >> snd) ++ a (Resword "]") >> fst;;
+
+delete_parser "vector";;
+install_parser("vector",parse_vector);;
+
+prioritize_vector();;
+
+(* ------------------------------------------------------------------------- *)
+(* Examples:
+;;
+type_of `vector[0;1]`;;
+type_of `vector[x;y] + vector[&0;b]`;;
+type_of `vector[x;y] + vector[a;b;c]`;;
+type_of `vector[]`;;
+type_of `vector[x;y] + vector l`;;
+type_of `vector[x;y] + b`;;
+type_of `vector[vector[1;0]; vector[0;1]]`;;
+
+new_type_abbrev ("byte",`:bool^8`);;
+type_of `vector[b0;b1;b2;b3;b4;b5;b6;b7;b8]:byte`;;
+type_of `vector[b0;b1;b2;b3;b4;b5;b6;b7]:byte`;;                             *)
+(* ------------------------------------------------------------------------- *)
+
+(* ------------------------------------------------------------------------- *)
+(* Drop.                                                                     *)
+(* ------------------------------------------------------------------------- *)
+
+let ARITH_ITER = prove
+ (`(!n f x:A. ITER (NUMERAL n) f x = ITER n f x) /\
+   (!f x:A. ITER _0 f x = x) /\
+   (!n f x:A. ITER (BIT0 n) f x = ITER n f (ITER n f x)) /\
+   (!n f x:A. ITER (BIT1 n) f x = ITER n f (ITER n f (f x)))`,
+  CONV_TAC BITS_ELIM_CONV THEN
+  REWRITE_TAC[MULT_2; GSYM ADD1; ITER_ADD; ITER_ALT]);;
+
+let DROP = new_recursive_definition num_RECURSION
+  `(!l:A list. DROP 0 l = l) /\
+   (!n l:A list. DROP (SUC n) l = DROP n (TL l))`;;
+
+let DROP_CLAUSES = prove
+ (`(!l:A list. DROP 0 l = l) /\
+   (!n x:A l. DROP (SUC n) (CONS x l) = DROP n l)`,
+  REWRITE_TAC[DROP; TL]);;
+
+let EL_HD_DROP = prove
+ (`!n l:A list. EL n l = HD (DROP n l)`,
+  INDUCT_TAC THEN ASM_REWRITE_TAC[EL; DROP]);;
+
+let DROP_ITER = prove
+ (`!n l:A list. DROP n l = ITER n TL l`,
+  INDUCT_TAC THEN ASM_REWRITE_TAC[DROP; ITER_ALT]);;
+
+let ARITH_DROP = prove
+ (`(!n l:A list. DROP (NUMERAL n) l = DROP n l) /\
+   (!l:A list. DROP _0 l = l) /\
+   (!n l:A list. DROP (BIT0 n) l = DROP n (DROP n l)) /\
+   (!n x:A l. DROP (BIT1 n) (CONS x l) = DROP n (DROP n l))`,
+  REWRITE_TAC[DROP_ITER; ARITH_ITER; TL]);;
+
+let DROP_CONV : conv =
+  let [pth0;pth1;pth2;pth3] = map SPEC_ALL (CONJUNCTS ARITH_DROP) in
+  let conv0 = REWR_CONV pth0
+  and conv1 = REWR_CONV pth1
+  and conv2 = REWR_CONV pth2
+  and conv3 = REWR_CONV pth3 in
+  let rec DROP_CONV tm =
+    (conv1 ORELSEC
+     ((conv2 ORELSEC conv3) THENC RAND_CONV DROP_CONV THENC DROP_CONV)) tm in
+  conv0 THENC DROP_CONV;;
+
+(* ------------------------------------------------------------------------- *)
+(* Examples:
+;;
+DROP_CONV `DROP 6 [1;2;3;4;5;6;7;8]`;;
+DROP_CONV `DROP 6 [1;2;3;4]`;;                                               *)
+(* ------------------------------------------------------------------------- *)
+
+(* ------------------------------------------------------------------------- *)
+(* VECTOR_COMPONENT_CONV                                                     *)
+(* ------------------------------------------------------------------------- *)
+
+let VECTOR_CONV0 : conv =
+  let ivar = `i:num`
+  and pth = prove
+   (`1 <= i /\ i <= dimindex (:B) ==> vector l:A^B$i = HD (DROP (PRE i) l)`,
+    REWRITE_TAC[GSYM EL_HD_DROP; ARITH_RULE `PRE i = i - 1`] THEN
+    MATCH_ACCEPT_TAC VECTOR_COMPONENT) in
+  fun tm ->
+    let xty,nty,ltm,itm =
+      match tm with
+      | Comb(Comb(Const("$",_),Comb(Const("vector",
+          Tyapp(_,(_::Tyapp(_,(xty::nty::_))::_))), ltm)), itm) ->
+        xty,nty,ltm,itm
+      | _ -> fail () in
+    let n = dest_finty nty
+    and i = dest_numeral itm in
+    if i =/ num_0 || i >/ n then failwith "VECTOR_CONV0" else
+    let mklvar ty = mk_var("l",mk_type("list",[ty])) in
+    let lvar = mklvar xty in
+    let pth' = INST[ltm,lvar; itm,ivar](INST_TYPE[xty,aty;nty,bty] pth) in
+    let atm = lhand(concl pth') in
+    let ath1 = NUM_LE_CONV (lhand atm)
+    and ath2 = (RAND_CONV DIMINDEX_CONV THENC NUM_LE_CONV) (rand atm) in
+    MP pth' (CONJ (EQT_ELIM ath1) (EQT_ELIM ath2));;
+
+(* ------------------------------------------------------------------------- *)
+(* Tests;;
+VECTOR_CONV0 `vector[1;2;3]$1`;;
+VECTOR_CONV0 `vector[1;2;3]$0`;;
+VECTOR_CONV0 `vector[1;2;3]$4`;;                                             *)
+(* ------------------------------------------------------------------------- *)
+
+let VECTOR_COMPONENT_CONV : conv =
+  let HD_CONV = REWR_CONV HD in
+  fun th -> try (VECTOR_CONV0 THENC
+                 RAND_CONV (LAND_CONV NUM_PRE_CONV THENC DROP_CONV) THENC
+                 HD_CONV) th
+            with Failure _ -> failwith "VECTOR_COMPONENT_CONV";;
+
+(* ------------------------------------------------------------------------- *)
+(* Tests;;
+VECTOR_COMPONENT_CONV `vector[2;3;1]$1`;;
+VECTOR_COMPONENT_CONV `vector[2;3;1]$2`;;
+VECTOR_COMPONENT_CONV `vector[2;3;1]$3`;;
+VECTOR_COMPONENT_CONV `vector[2;3;1]$0`;;
+VECTOR_COMPONENT_CONV `vector[2;3;1]$4`;;                                    *)
+(* ------------------------------------------------------------------------- *)

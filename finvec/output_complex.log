@@ -1,0 +1,2956 @@
+        HOL Light 2.20++, built 15 December 2018 on OCaml 4.01.0 with BLCR
+        Preloaded with complex analysis and quaternions
+
+val it : unit = ()
+#             Setup restart environment.
+# #       val it : unit = ()
+# - : unit = ()
+val FSTCART_COMPONENT : thm =
+  |- !x i. 1 <= i /\ i <= dimindex (:M) ==> fstcart x$i = x$i
+val SNDCART_COMPONENT : thm =
+  |- !x i.
+         1 <= i /\ i <= dimindex (:N) ==> sndcart x$i = x$(i + dimindex (:M))
+val PASTECART_COMPONENT : thm =
+  |- (!u v i. 1 <= i /\ i <= dimindex (:M) ==> pastecart u v$i = u$i) /\
+     (!u v i.
+          dimindex (:M) + 1 <= i /\ i <= dimindex (:M) + dimindex (:N)
+          ==> pastecart u v$i = v$(i - dimindex (:M)))
+val MATRIX_ADD_ROW : thm = |- !X Y i. (X + Y)$i = X$i + Y$i
+val MATRIX_SUB_ROW : thm = |- !X Y i. (X - Y)$i = X$i - Y$i
+val MATRIX_NEG_ROW : thm = |- !X i. --X$i = --(X$i)
+val MATRIX_CMUL_ROW : thm = |- !c X i. (c %% X)$i = c % X$i
+val MAT_0_ROW : thm = |- mat 0$i = vec 0
+val FSTCART_SNDCART_MAT_ZERO : thm =
+  |- fstcart (mat 0) = mat 0 /\ sndcart (mat 0) = mat 0
+val FSTCART_SNDCART_MATRIX_ADD : thm =
+  |- !x y.
+         fstcart (x + y) = fstcart x + fstcart y /\
+         sndcart (x + y) = sndcart x + sndcart y
+val MATRIX_ARITH_TAC : tactic = <fun>
+val MATRIX_ARITH : term -> thm = <fun>
+- : unit = ()
+val matrix_norm : thm = |- !m. norm m = norm (vectorize m)
+val VSUM_COMPONENT_FULL : thm = |- !s f i. vsum s f$i = sum s (\x. f x$i)
+val NEUTRAL_MATRIX_ADD : thm = |- neutral (+) = mat 0
+val MONOIDAL_MATRIX_ADD : thm = |- monoidal (+)
+val msum : thm = |- !s f. msum s f = (lambda i j. sum s (\x. f x$i$j))
+val MSUM_COMPONENT : thm = |- !s f i j. msum s f$i$j = sum s (\x. f x$i$j)
+val MSUM_ROW : thm = |- !s f i. msum s f$i = vsum s (\x. f x$i)
+val MSUM_CLAUSES : thm =
+  |- (!f. msum {} f = mat 0) /\
+     (!x f s.
+          FINITE s
+          ==> msum (x INSERT s) f =
+              (if x IN s then msum s f else f x + msum s f))
+val MSUM : thm = |- !f s. FINITE s ==> msum s f = iterate (+) s f
+val MSUM_EQ_0 : thm =
+  |- !f s. (!x. x IN s ==> f x = mat 0) ==> msum s f = mat 0
+val MSUM_0 : thm = |- msum s (\x. mat 0) = mat 0
+val MSUM_LMUL : thm = |- !f c s. msum s (\x. c %% f x) = c %% msum s f
+val MSUM_RMUL : thm = |- !c s v. msum s (\x. c x %% v) = sum s c %% v
+val MSUM_ADD : thm =
+  |- !f g s. FINITE s ==> msum s (\x. f x + g x) = msum s f + msum s g
+val MSUM_SUB : thm =
+  |- !f g s. FINITE s ==> msum s (\x. f x - g x) = msum s f - msum s g
+val MSUM_CONST : thm = |- !c s. FINITE s ==> msum s (\n. c) = &(CARD s) %% c
+val MSUM_IMAGE : thm =
+  |- !f g s.
+         FINITE s /\ (!x y. x IN s /\ y IN s /\ f x = f y ==> x = y)
+         ==> msum (IMAGE f s) g = msum s (g o f)
+val MSUM_UNION : thm =
+  |- !f s t.
+         FINITE s /\ FINITE t /\ DISJOINT s t
+         ==> msum (s UNION t) f = msum s f + msum t f
+val MSUM_DIFF : thm =
+  |- !f s t.
+         FINITE s /\ t SUBSET s ==> msum (s DIFF t) f = msum s f - msum t f
+val MSUM_DELETE : thm =
+  |- !f s a. FINITE s /\ a IN s ==> msum (s DELETE a) f = msum s f - f a
+val MSUM_INCL_EXCL : thm =
+  |- !s t f.
+         FINITE s /\ FINITE t
+         ==> msum s f + msum t f = msum (s UNION t) f + msum (s INTER t) f
+val MSUM_NEG : thm = |- !f s. msum s (\x. --f x) = --msum s f
+val MSUM_EQ : thm =
+  |- !f g s. (!x. x IN s ==> f x = g x) ==> msum s f = msum s g
+val MSUM_SUPERSET : thm =
+  |- !f u v.
+         u SUBSET v /\ (!x. x IN v /\ ~(x IN u) ==> f x = mat 0)
+         ==> msum v f = msum u f
+0..0..solved at 3
+0..0..solved at 2
+0..0..solved at 2
+val MSUM_SUPPORT : thm =
+  |- !f s. msum {x | x IN s /\ ~(f x = mat 0)} f = msum s f
+0..0..solved at 2
+0..0..2..solved at 5
+0..0..solved at 2
+val MSUM_UNIV : thm =
+  |- !f s. support (+) f (:A) SUBSET s ==> msum s f = msum (:A) f
+0..0..1..2..6..11..19..34..49..70..117..164..237..386..553..836..1213..1681..2277..solved at 2731
+val MSUM_EQ_SUPERSET : thm =
+  |- !f s t.
+         FINITE t /\
+         t SUBSET s /\
+         (!x. x IN t ==> f x = g x) /\
+         (!x. x IN s /\ ~(x IN t) ==> f x = mat 0)
+         ==> msum s f = msum t g
+0..0..solved at 3
+0..0..solved at 2
+0..0..2..4..solved at 8
+val MSUM_UNION_RZERO : thm =
+  |- !f u v.
+         (!x. x IN v /\ ~(x IN u) ==> f x = mat 0)
+         ==> msum (u UNION v) f = msum u f
+0..0..solved at 2
+0..0..2..4..solved at 8
+0..0..solved at 2
+val MSUM_UNION_LZERO : thm =
+  |- !f u v.
+         (!x. x IN u /\ ~(x IN v) ==> f x = mat 0)
+         ==> msum (u UNION v) f = msum v f
+val MSUM_RESTRICT : thm =
+  |- !f s. msum s (\x. if x IN s then f x else mat 0) = msum s f
+val MSUM_RESTRICT_SET : thm =
+  |- !P s f.
+         msum {x | x IN s /\ P x} f = msum s (\x. if P x then f x else mat 0)
+val MSUM_CASES : thm =
+  |- !s P f g.
+         FINITE s
+         ==> msum s (\x. if P x then f x else g x) =
+             msum {x | x IN s /\ P x} f + msum {x | x IN s /\ ~P x} g
+val MSUM_SING : thm = |- !f x. msum {x} f = f x
+val VECTORIZE_MSUM : thm =
+  |- !s f. vectorize (msum s f) = vsum s (\x. vectorize (f x))
+val MSUM_NORM : thm =
+  |- !s f. FINITE s ==> norm (msum s f) <= sum s (\x. norm (f x))
+val MSUM_NORM_LE : thm =
+  |- !s f g.
+         FINITE s /\ (!x. x IN s ==> norm (f x) <= g x)
+         ==> norm (msum s f) <= sum s g
+0..0..1..2..4..solved at 9
+val MSUM_NORM_TRIANGLE : thm =
+  |- !s f b. FINITE s /\ sum s (\a. norm (f a)) <= b ==> norm (msum s f) <= b
+val MSUM_NORM_BOUND : thm =
+  |- !s f b.
+         FINITE s /\ (!x. x IN s ==> norm (f x) <= b)
+         ==> norm (msum s f) <= &(CARD s) * b
+val MSUM_CLAUSES_NUMSEG : thm =
+  |- (!m. msum (m..0) f = (if m = 0 then f 0 else mat 0)) /\
+     (!m n.
+          msum (m..SUC n) f =
+          (if m <= SUC n then msum (m..n) f + f (SUC n) else msum (m..n) f))
+val MSUM_CLAUSES_RIGHT : thm =
+  |- !f m n. 0 < n /\ m <= n ==> msum (m..n) f = msum (m..n - 1) f + f n
+val MSUM_CMUL_NUMSEG : thm =
+  |- !f c m n. msum (m..n) (\x. c %% f x) = c %% msum (m..n) f
+val MSUM_EQ_NUMSEG : thm =
+  |- !f g m n.
+         (!x. m <= x /\ x <= n ==> f x = g x)
+         ==> msum (m..n) f = msum (m..n) g
+val MSUM_IMAGE_GEN : thm =
+  |- !f g s.
+         FINITE s
+         ==> msum s g = msum (IMAGE f s) (\y. msum {x | x IN s /\ f x = y} g)
+val MSUM_GROUP : thm =
+  |- !f g s t.
+         FINITE s /\ IMAGE f s SUBSET t
+         ==> msum t (\y. msum {x | x IN s /\ f x = y} g) = msum s g
+val MSUM_GROUP_RELATION : thm =
+  |- !R g s t.
+         FINITE s /\ (!x. x IN s ==> (?!y. y IN t /\ R x y))
+         ==> msum t (\y. msum {x | x IN s /\ R x y} g) = msum s g
+val MSUM_VMUL : thm = |- !f v s. sum s f %% v = msum s (\x. f x %% v)
+val MSUM_DELTA : thm =
+  |- !s a.
+         msum s (\x. if x = a then b else mat 0) =
+         (if a IN s then b else mat 0)
+val MSUM_ADD_NUMSEG : thm =
+  |- !f g m n. msum (m..n) (\i. f i + g i) = msum (m..n) f + msum (m..n) g
+val MSUM_SUB_NUMSEG : thm =
+  |- !f g m n. msum (m..n) (\i. f i - g i) = msum (m..n) f - msum (m..n) g
+val MSUM_ADD_SPLIT : thm =
+  |- !f m n p.
+         m <= n + 1
+         ==> msum (m..n + p) f = msum (m..n) f + msum (n + 1..n + p) f
+val MSUM_MSUM_PRODUCT : thm =
+  |- !s t x.
+         FINITE s /\ (!i. i IN s ==> FINITE (t i))
+         ==> msum s (\i. msum (t i) (x i)) =
+             msum {i,j | i IN s /\ j IN t i} (\(i,j). x i j)
+0..0..4..8..18..34..solved at 48
+0..0..2..4..solved at 8
+0..0..4..8..18..34..solved at 48
+0..0..2..4..8..16..35..58..104..165..299..465..829..1296..2124..3187..solved at 3583
+val MSUM_IMAGE_NONZERO : thm =
+  |- !d i s.
+         FINITE s /\
+         (!x y.
+              x IN s /\ y IN s /\ ~(x = y) /\ i x = i y ==> d (i x) = mat 0)
+         ==> msum (IMAGE i s) d = msum s (d o i)
+val MSUM_UNION_NONZERO : thm =
+  |- !f s t.
+         FINITE s /\ FINITE t /\ (!x. x IN s INTER t ==> f x = mat 0)
+         ==> msum (s UNION t) f = msum s f + msum t f
+0..0..2..4..10..18..30..solved at 46
+0..0..2..4..8..16..28..59..103..173..solved at 214
+val MSUM_UNIONS_NONZERO : thm =
+  |- !f s.
+         FINITE s /\
+         (!t. t IN s ==> FINITE t) /\
+         (!t1 t2 x.
+              t1 IN s /\ t2 IN s /\ ~(t1 = t2) /\ x IN t1 /\ x IN t2
+              ==> f x = mat 0)
+         ==> msum (UNIONS s) f = msum s (\t. msum t f)
+val MSUM_CLAUSES_LEFT : thm =
+  |- !f m n. m <= n ==> msum (m..n) f = f m + msum (m + 1..n) f
+val MSUM_DIFFS : thm =
+  |- !m n.
+         msum (m..n) (\k. f k - f (k + 1)) =
+         (if m <= n then f m - f (n + 1) else mat 0)
+val MSUM_DIFFS_ALT : thm =
+  |- !m n.
+         msum (m..n) (\k. f (k + 1) - f k) =
+         (if m <= n then f (n + 1) - f m else mat 0)
+0..0..solved at 3
+0..0..solved at 2
+0..0..solved at 2
+0..0..solved at 2
+0..0..solved at 2
+0..0..solved at 2
+0..0..solved at 3
+val MSUM_DELETE_CASES : thm =
+  |- !x f s.
+         FINITE s
+         ==> msum (s DELETE x) f =
+             (if x IN s then msum s f - f x else msum s f)
+0..0..0..1..2..3..solved at 8
+0..0..1..2..5..9..15..solved at 28
+0..0..1..solved at 4
+0..0..1..2..6..12..24..solved at 46
+val MSUM_EQ_GENERAL : thm =
+  |- !s t f g h.
+         (!y. y IN t ==> (?!x. x IN s /\ h x = y)) /\
+         (!x. x IN s ==> h x IN t /\ g (h x) = f x)
+         ==> msum s f = msum t g
+0..0..1..solved at 4
+0..0..1..solved at 4
+0..0..1..solved at 4
+0..0..1..solved at 4
+0..0..1..2..6..12..24..solved at 46
+val MSUM_EQ_GENERAL_INVERSES : thm =
+  |- !s t f g h k.
+         (!y. y IN t ==> k y IN s /\ h (k y) = y) /\
+         (!x. x IN s ==> h x IN t /\ k (h x) = x /\ g (h x) = f x)
+         ==> msum s f = msum t g
+val MSUM_OFFSET : thm =
+  |- !p f m n. msum (m + p..n + p) f = msum (m..n) (\i. f (i + p))
+val MSUM_OFFSET_0 : thm =
+  |- !f m n. m <= n ==> msum (m..n) f = msum (0..n - m) (\i. f (i + m))
+val MSUM_TRIV_NUMSEG : thm = |- !f m n. n < m ==> msum (m..n) f = mat 0
+val MSUM_CONST_NUMSEG : thm =
+  |- !c m n. msum (m..n) (\n. c) = &((n + 1) - m) %% c
+val MSUM_SUC : thm = |- !f m n. msum (SUC n..SUC m) f = msum (n..m) (f o SUC)
+val MSUM_BIJECTION : thm =
+  |- !f p s.
+         (!x. x IN s ==> p x IN s) /\
+         (!y. y IN s ==> (?!x. x IN s /\ p x = y))
+         ==> msum s f = msum s (f o p)
+val MSUM_PARTIAL_SUC : thm =
+  |- !f g m n.
+         msum (m..n) (\k. f k %% (g (k + 1) - g k)) =
+         (if m <= n
+          then f (n + 1) %% g (n + 1) -
+               f m %% g m -
+               msum (m..n) (\k. (f (k + 1) - f k) %% g (k + 1))
+          else mat 0)
+val MSUM_PARTIAL_PRE : thm =
+  |- !f g m n.
+         msum (m..n) (\k. f k %% (g k - g (k - 1))) =
+         (if m <= n
+          then f (n + 1) %% g n -
+               f m %% g (m - 1) -
+               msum (m..n) (\k. (f (k + 1) - f k) %% g k)
+          else mat 0)
+val MSUM_COMBINE_L : thm =
+  |- !f m n p.
+         0 < n /\ m <= n /\ n <= p + 1
+         ==> msum (m..n - 1) f + msum (n..p) f = msum (m..p) f
+val MSUM_COMBINE_R : thm =
+  |- !f m n p.
+         m <= n + 1 /\ n <= p
+         ==> msum (m..n) f + msum (n + 1..p) f = msum (m..p) f
+val MSUM_INJECTION : thm =
+  |- !f p s.
+         FINITE s /\
+         (!x. x IN s ==> p x IN s) /\
+         (!x y. x IN s /\ y IN s /\ p x = p y ==> x = y)
+         ==> msum s (f o p) = msum s f
+val MSUM_SWAP : thm =
+  |- !f s t.
+         FINITE s /\ FINITE t
+         ==> msum s (\i. msum t (f i)) = msum t (\j. msum s (\i. f i j))
+val MSUM_SWAP_NUMSEG : thm =
+  |- !a b c d f.
+         msum (a..b) (\i. msum (c..d) (f i)) =
+         msum (c..d) (\j. msum (a..b) (\i. f i j))
+val MSUM_ADD_GEN : thm =
+  |- !f g s.
+         FINITE {x | x IN s /\ ~(f x = mat 0)} /\
+         FINITE {x | x IN s /\ ~(g x = mat 0)}
+         ==> msum s (\x. f x + g x) = msum s f + msum s g
+0..0..solved at 2
+0..0..solved at 2
+0..0..solved at 2
+val MSUM_CASES_1 : thm =
+  |- !s a.
+         FINITE s /\ a IN s
+         ==> msum s (\x. if x = a then y else f x) = msum s f + y - f a
+val MSUM_SING_NUMSEG : thm = |- msum (n..n) f = f n
+val MSUM_1 : thm = |- msum (1..1) f = f 1
+val MSUM_2 : thm = |- !t. msum (1..2) t = t 1 + t 2
+val MSUM_3 : thm = |- !t. msum (1..3) t = t 1 + t 2 + t 3
+val MSUM_4 : thm = |- !t. msum (1..4) t = t 1 + t 2 + t 3 + t 4
+val MSUM_PAIR : thm =
+  |- !f m n.
+         msum (2 * m..2 * n + 1) f =
+         msum (m..n) (\i. f (2 * i) + f (2 * i + 1))
+val MSUM_PAIR_0 : thm =
+  |- !f n.
+         msum (0..2 * n + 1) f = msum (0..n) (\i. f (2 * i) + f (2 * i + 1))
+val MSUM_REFLECT : thm =
+  |- !x m n.
+         msum (m..n) x =
+         (if n < m then mat 0 else msum (0..n - m) (\i. x (n - i)))
+- : unit = ()
+val already_loaded : string -> bool = <fun>
+val prioritize_complex : unit -> unit = <fun>
+- : unit = ()
+File "Multivariate/complexes.ml" already loaded
+- : unit = ()
+File "Multivariate/cross.ml" already loaded
+- : unit = ()
+val SINGLE : ('a list -> 'b) -> 'a -> 'b = <fun>
+val distrib : ('a -> 'b) list -> 'a -> 'b list = <fun>
+val DISTRIB : ('a -> tactic) list -> 'a -> tactic = <fun>
+val REWRITE_TACS : thm list -> tactic = <fun>
+val GCONJUNCTS : thm -> thm list = <fun>
+0..0..1..2..solved at 6
+val COMPONENT_LE_NORM_ALT : thm =
+  |- !x i. 1 <= i /\ i <= dimindex (:N) ==> x$i <= norm x
+val RE_IM_NORM : thm =
+  |- !x. Re x <= norm x /\
+         Im x <= norm x /\
+         abs (Re x) <= norm x /\
+         abs (Im x) <= norm x
+File "/home/maggesi/Devel/HOL/holy/cvectors/misc.hl", line 62, characters 4-45:
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+[]
+val RE_NORM : thm = |- !x. Re x <= norm x
+val IM_NORM : thm = |- !x. Im x <= norm x
+val ABS_RE_NORM : thm = |- !x. abs (Re x) <= norm x
+val ABS_IM_NORM : thm = |- !x. abs (Im x) <= norm x
+val NORM_RE : thm = |- !x. &0 <= norm x + Re x /\ &0 <= norm x - Re x
+File "/home/maggesi/Devel/HOL/holy/cvectors/misc.hl", line 68, characters 4-29:
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+[]
+val NORM_RE_ADD : thm = |- !x. &0 <= norm x + Re x
+val NORM_RE_SUB : thm = |- !x. &0 <= norm x - Re x
+val NORM2_ADD_REAL : thm =
+  |- !x y.
+         real x /\ real y
+         ==> norm (x + ii * y) pow 2 = norm x pow 2 + norm y pow 2
+val COMPLEX_EQ_RCANCEL_IMP : thm =
+  |- !x y z. x * z = y * z /\ ~(x = y) ==> z = Cx (&0)
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+val COMPLEX_BALANCE_DIV_MUL : thm =
+  |- !x y z t. ~(z = Cx (&0)) ==> (x = y / z * t <=> x * z = y * t)
+0..0..2..solved at 8
+0..0..solved at 3
+0..0..2..9..solved at 20
+0..0..1..3..7..solved at 14
+0..0..3..solved at 10
+0..0..solved at 3
+0..0..2..solved at 7
+0..0..2..solved at 9
+0..0..3..6..16..29..50..82..118..164..solved at 220
+0..0..3..6..17..31..56..91..132..184..400..640..solved at 853
+val CSQRT_MUL_LCX_LT : thm =
+  |- !x y. &0 < x ==> csqrt (Cx x * y) = Cx (sqrt x) * csqrt y
+val CSQRT_MUL_LCX : thm =
+  |- !x y. &0 <= x ==> csqrt (Cx x * y) = Cx (sqrt x) * csqrt y
+val REAL_ADD_POW_2 : thm =
+  |- !x y. (x + y) pow 2 = x pow 2 + y pow 2 + &2 * x * y
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+val COMPLEX_ADD_POW_2 : thm =
+  |- !x y. (x + y) pow 2 = x pow 2 + y pow 2 + Cx (&2) * x * y
+- : unit = ()
+0..0..1..solved at 4
+val FINITE_INTER_ENUM : thm = |- !s n. FINITE (s INTER (0..n))
+0..0..1..2..3..7..solved at 15
+val NORM_PASTECART_GE1 : thm = |- !x y. norm x <= norm (pastecart x y)
+0..0..1..2..3..7..solved at 15
+val NORM_PASTECART_GE2 : thm = |- !x y. norm y <= norm (pastecart x y)
+val SUMS_PASTECART : thm =
+  |- !s f1 f2 l1 l2.
+         (f1 sums l1) s /\ (f2 sums l2) s <=>
+         ((\x. pastecart (f1 x) (f2 x)) sums pastecart l1 l2) s
+val LINEAR_SUMS : thm =
+  |- !s f l g. linear g ==> (f sums l) s ==> (g o f sums g l) s
+val real_of_complex : thm = |- !c. real_of_complex c = (@r. c = Cx r)
+0..0..1..2..5..9..15..30..49..79..130..190..275..solved at 327
+val REAL_OF_COMPLEX : thm = |- !c. real c ==> Cx (real_of_complex c) = c
+0..0..1..2..6..13..solved at 19
+val REAL_OF_COMPLEX_RE : thm = |- !c. real c ==> real_of_complex c = Re c
+val REAL_OF_COMPLEX_CX : thm = |- !r. real_of_complex (Cx r) = r
+0..0..1..2..5..9..15..26..37..52..73..94..121..solved at 140
+val REAL_OF_COMPLEX_NORM : thm =
+  |- !c. real c ==> norm c = abs (real_of_complex c)
+0..0..1..2..5..9..15..24..33..44..64..84..113..160..207..272..358..444..551..846..solved at 926
+val REAL_OF_COMPLEX_ADD : thm =
+  |- !x y.
+         real x /\ real y
+         ==> real_of_complex (x + y) = real_of_complex x + real_of_complex y
+3 basis elements and 0 critical pairs
+val REAL_MUL : thm = |- !x y. real x /\ real y ==> real (x * y)
+0..0..1..2..6..13..29..60..117..227..487..964..1984..solved at 3546
+val REAL_OF_COMPLEX_MUL : thm =
+  |- !x y.
+         real x /\ real y
+         ==> real_of_complex (x * y) = real_of_complex x * real_of_complex y
+val REAL_OF_COMPLEX_0 : thm =
+  |- !x. real x ==> (real_of_complex x = &0 <=> x = Cx (&0))
+val REAL_COMPLEX_ADD_CNJ : thm = |- !x. real (cnj x + x) /\ real (x + cnj x)
+val vector_const : thm = |- !k. vector_const k = (lambda i. k)
+val vector_map : thm = |- !f v. vector_map f v = (lambda i. f (v$i))
+val vector_map2 : thm =
+  |- !f v1 v2. vector_map2 f v1 v2 = (lambda i. f (v1$i) (v2$i))
+val vector_map3 : thm =
+  |- !f v1 v2 v3. vector_map3 f v1 v2 v3 = (lambda i. f (v1$i) (v2$i) (v3$i))
+0..0..0..0..0..0..0..4..11..18..32..46..60..78..96..114..143..172..201..248..297..346..415..501..591..744..907..solved at 949
+val FINITE_INDEX_INRANGE_2 : thm =
+  |- !i. ?k. 1 <= k /\
+             k <= dimindex (:N) /\
+             (!x. x$i = x$k) /\
+             (!x. x$i = x$k) /\
+             (!x. x$i = x$k) /\
+             (!x. x$i = x$k)
+val COMPONENT_TAC : thm -> tactic = <fun>
+val VECTOR_CONST_COMPONENT : thm = |- !i k. vector_const k$i = k
+val VECTOR_MAP_COMPONENT : thm = |- !i f v. vector_map f v$i = f (v$i)
+val VECTOR_MAP2_COMPONENT : thm =
+  |- !i f v1 v2. vector_map2 f v1 v2$i = f (v1$i) (v2$i)
+val VECTOR_MAP3_COMPONENT : thm =
+  |- !i f v1 v2 v3. vector_map3 f v1 v2 v3$i = f (v1$i) (v2$i) (v3$i)
+val COMMON_TAC : tactic = <fun>
+val VECTOR_MAP_VECTOR_CONST : thm =
+  |- !f k. vector_map f (vector_const k) = vector_const (f k)
+val VECTOR_MAP_VECTOR_MAP : thm =
+  |- !f g v. vector_map f (vector_map g v) = vector_map (f o g) v
+val VECTOR_MAP_VECTOR_MAP2 : thm =
+  |- !f g u v.
+         vector_map f (vector_map2 g u v) = vector_map2 (\x y. f (g x y)) u v
+val VECTOR_MAP2_LVECTOR_CONST : thm =
+  |- !f k v. vector_map2 f (vector_const k) v = vector_map (f k) v
+val VECTOR_MAP2_RVECTOR_CONST : thm =
+  |- !f k v. vector_map2 f v (vector_const k) = vector_map (\x. f x k) v
+val VECTOR_MAP2_LVECTOR_MAP : thm =
+  |- !f g v1 v2.
+         vector_map2 f (vector_map g v1) v2 = vector_map2 (f o g) v1 v2
+val VECTOR_MAP2_RVECTOR_MAP : thm =
+  |- !f g v1 v2.
+         vector_map2 f v1 (vector_map g v2) =
+         vector_map2 (\x y. f x (g y)) v1 v2
+val VECTOR_MAP2_LVECTOR_MAP2 : thm =
+  |- !f g v1 v2 v3.
+         vector_map2 f (vector_map2 g v1 v2) v3 =
+         vector_map3 (\x y. f (g x y)) v1 v2 v3
+val VECTOR_MAP2_RVECTOR_MAP2 : thm =
+  |- !f g v1 v2 v3.
+         vector_map2 f v1 (vector_map2 g v2 v3) =
+         vector_map3 (\x y z. f x (g y z)) v1 v2 v3
+val VECTOR_MAP_SIMP_TAC : tactic = <fun>
+val VECTOR_MAP_PROPERTY_TAC : thm list -> thm -> tactic = <fun>
+val VECTOR_MAP_PROPERTY : term -> thm list -> thm -> thm = <fun>
+val COMPLEX_VECTOR_MAP : thm =
+  |- !f g. f = vector_map g <=> (!z. f z = complex (g (Re z),g (Im z)))
+val COMPLEX_NEG_IS_A_MAP : thm = |- (--) = vector_map (--)
+val VECTOR_NEG_IS_A_MAP : thm = |- (--) = vector_map (--)
+val VECTOR_MAP_VECTOR_MAP_ALT : thm =
+  |- !f g f' g'.
+         f = vector_map f' /\ g = vector_map g'
+         ==> f o g = vector_map (f' o g')
+val COMPLEX_VECTOR_MAP2 : thm =
+  |- !f g.
+         f = vector_map2 g <=>
+         (!z1 z2. f z1 z2 = complex (g (Re z1) (Re z2),g (Im z1) (Im z2)))
+val VECTOR_MAP2_RVECTOR_MAP_ALT : thm =
+  |- !f g f' g'.
+         f = vector_map2 f' /\ g = vector_map g'
+         ==> (\x y. f x (g y)) = vector_map2 (\x y. f' x (g' y))
+val COMPLEX_ADD_IS_A_MAP : thm = |- (+) = vector_map2 (+)
+val VECTOR_ADD_IS_A_MAP : thm = |- (+) = vector_map2 (+)
+val COMPLEX_SUB_IS_A_MAP : thm = |- (-) = vector_map2 (-)
+val VECTOR_SUB_IS_A_MAP : thm = |- (-) = vector_map2 (-)
+val COMMON_TAC : thm -> tactic = <fun>
+val PASTECART_VECTOR_MAP : thm =
+  |- !f x y.
+         pastecart (vector_map f x) (vector_map f y) =
+         vector_map f (pastecart x y)
+val PASTECART_VECTOR_MAP2 : thm =
+  |- !f x1 x2 y1 y2.
+         pastecart (vector_map2 f x1 x2) (vector_map2 f y1 y2) =
+         vector_map2 f (pastecart x1 y1) (pastecart x2 y2)
+val vector_zip : thm = |- !v1 v2. vector_zip v1 v2 = (lambda i. v1$i,v2$i)
+val VECTOR_ZIP_COMPONENT : thm = |- !i v1 v2. vector_zip v1 v2$i = v1$i,v2$i
+val vector_unzip : thm =
+  |- !v. vector_unzip v = vector_map FST v,vector_map SND v
+val VECTOR_UNZIP_COMPONENT : thm =
+  |- !i v.
+         FST (vector_unzip v)$i = FST (v$i) /\
+         SND (vector_unzip v)$i = SND (v$i)
+val VECTOR_MAP2_AS_VECTOR_MAP : thm =
+  |- !f v1 v2.
+         vector_map2 f v1 v2 = vector_map (UNCURRY f) (vector_zip v1 v2)
+- : unit = ()
+- : unit = ()
+- : unit = ()
+val prioritize_cvector : unit -> unit = <fun>
+val cvector_mul : thm = |- !a. cvector_mul a = vector_map ((*) a)
+val cvector_cnj : thm = |- cvector_cnj = vector_map cnj
+- : unit = ()
+val CVECTOR_EQ : thm =
+  |- !x y. x = y <=> (!i. 1 <= i /\ i <= dimindex (:N) ==> x$i = y$i)
+val CVECTOR_EQ_FULL : thm = |- !x y. x = y <=> (!i. x$i = y$i)
+val CVECTOR_ZERO_COMPONENT : thm = |- !i. mat 0$i = Cx (&0)
+0..0..1..2..solved at 6
+0..0..1..2..solved at 6
+val CVECTOR_NON_ZERO : thm =
+  |- !x. ~(x = mat 0) <=>
+         (?i. 1 <= i /\ i <= dimindex (:N) /\ ~(x$i = Cx (&0)))
+val CVECTOR_MUL_COMPONENT : thm = |- !c X i. (c % X)$i = c * X$i
+val CVECTOR_MUL_CX : thm = |- !a x. Cx a % x = a %% x
+val CVECTOR_CNJ_COMPONENT : thm = |- !x i. cvector_cnj x$i = cnj (x$i)
+1 basis elements and 0 critical pairs
+2 basis elements and 0 critical pairs
+val CVECTOR_ARITH_TAC : tactic = <fun>
+val CVECTOR_ARITH : term -> thm = <fun>
+val CVECTOR_MUL_ASSOC : thm = |- !a b x. a % b % x = (a * b) % x
+val CVECTOR_ADD_LDISTRIB : thm = |- !c x y. c % (x + y) = c % x + c % y
+val CVECTOR_SUB_LDISTRIB : thm = |- !c x y. c % (x - y) = c % x - c % y
+val CVECTOR_ADD_RDISTRIB : thm = |- !a b x. (a + b) % x = a % x + b % x
+val CVECTOR_MUL_ID : thm = |- !x. Cx (&1) % x = x
+val CVECTOR_MUL_LZERO : thm = |- !x. Cx (&0) % x = mat 0
+val CVECTOR_ADD_LDISTRIB : thm = |- !c x y. c % (x + y) = c % x + c % y
+val CVECTOR_ADD_RDISTRIB : thm = |- !a b x. (a + b) % x = a % x + b % x
+val CVECTOR_SUB_RDISTRIB : thm = |- !a b x. (a - b) % x = a % x - b % x
+val CVECTOR_MUL_RZERO : thm = |- !c. c % mat 0 = mat 0
+val CVECTOR_MUL_LZERO : thm = |- !x. Cx (&0) % x = mat 0
+3 basis elements and 2 critical pairs
+4 basis elements and 3 critical pairs
+4 basis elements and 2 critical pairs
+5 basis elements and 0 critical pairs
+2 basis elements and 0 critical pairs
+2 basis elements and 0 critical pairs
+val CVECTOR_MUL_EQ_0 : thm =
+  |- !a x. a % x = mat 0 <=> a = Cx (&0) \/ x = mat 0
+val CVECTOR_NEG_MINUS1 : thm = |- !x. --x = --Cx (&1) % x
+val CVECTOR_MUL_LNEG : thm = |- !c x. --c % x = --(c % x)
+val CVECTOR_MUL_RNEG : thm = |- !c x. c % --x = --(c % x)
+3 basis elements and 2 critical pairs
+4 basis elements and 3 critical pairs
+4 basis elements and 2 critical pairs
+5 basis elements and 0 critical pairs
+2 basis elements and 0 critical pairs
+2 basis elements and 0 critical pairs
+val CVECTOR_MUL_LCANCEL : thm =
+  |- !a x y. a % x = a % y <=> a = Cx (&0) \/ x = y
+3 basis elements and 2 critical pairs
+4 basis elements and 3 critical pairs
+4 basis elements and 2 critical pairs
+5 basis elements and 0 critical pairs
+2 basis elements and 0 critical pairs
+2 basis elements and 0 critical pairs
+val CVECTOR_MUL_RCANCEL : thm =
+  |- !a b x. a % x = b % x <=> a = b \/ x = mat 0
+val clinear : thm =
+  |- !f. clinear f <=>
+         (!x y. f (x + y) = f x + f y) /\ (!c x. f (c % x) = c % f x)
+val COMMON_TAC : thm list -> tactic = <fun>
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+val CLINEAR_COMPOSE_CMUL : thm = |- !f c. clinear f ==> clinear (\x. c % f x)
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+val CLINEAR_COMPOSE_NEG : thm = |- !f. clinear f ==> clinear (\x. --f x)
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+val CLINEAR_COMPOSE_ADD : thm =
+  |- !f g. clinear f /\ clinear g ==> clinear (\x. f x + g x)
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+val CLINEAR_COMPOSE_SUB : thm =
+  |- !f g. clinear f /\ clinear g ==> clinear (\x. f x - g x)
+val CLINEAR_COMPOSE : thm =
+  |- !f g. clinear f /\ clinear g ==> clinear (g o f)
+val CLINEAR_ID : thm = |- clinear (\x. x)
+val CLINEAR_I : thm = |- clinear I
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+val CLINEAR_ZERO : thm = |- clinear (\x. mat 0)
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+val CLINEAR_NEGATION : thm = |- clinear (--)
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+val CLINEAR_VMUL_COMPONENT : thm =
+  |- !f v k.
+         clinear f /\ 1 <= k /\ k <= dimindex (:N)
+         ==> clinear (\x. f x$k % v)
+0..0..1..2..5..10..20..32..48..solved at 61
+val CLINEAR_0 : thm = |- !f. clinear f ==> f (mat 0) = mat 0
+val CLINEAR_CMUL : thm = |- !f c x. clinear f ==> f (c % x) = c % f x
+val CLINEAR_NEG : thm = |- !f x. clinear f ==> f (--x) = --f x
+val CLINEAR_ADD : thm = |- !f x y. clinear f ==> f (x + y) = f x + f y
+val CLINEAR_SUB : thm = |- !f x y. clinear f ==> f (x - y) = f x - f y
+0..0..1..2..6..13..29..59..117..221..428..solved at 473
+0..0..1..solved at 4
+val CLINEAR_INJECTIVE_0 : thm =
+  |- !f. clinear f
+         ==> ((!x y. f x = f y ==> x = y) <=>
+              (!x. f x = mat 0 ==> x = mat 0))
+val CLINEAR_FSTCART_SNDCART : thm = |- clinear fstcart /\ clinear sndcart
+val CLINEAR_FSTCART : thm = |- clinear fstcart
+val CLINEAR_SNDCART : thm = |- clinear sndcart
+val FSTCART_SNDCART_CVECTOR_MUL : thm =
+  |- !x c. fstcart (c % x) = c % fstcart x /\ sndcart (c % x) = c % sndcart x
+val PASTECART_TAC : thm list -> tactic = <fun>
+val PASTECART_CVECTOR_ZERO : thm = |- pastecart (mat 0) (mat 0) = mat 0
+val PASTECART_EQ_CVECTOR_ZERO : thm =
+  |- !x y. pastecart x y = mat 0 <=> x = mat 0 /\ y = mat 0
+val PASTECART_CVECTOR_ADD : thm =
+  |- !x1 y1 x2 y2.
+         pastecart x1 y1 + pastecart x2 y2 = pastecart (x1 + x2) (y1 + y2)
+val PASTECART_CVECTOR_MUL : thm =
+  |- !x y c. pastecart (c % x) (c % y) = c % pastecart x y
+val cvector_re : thm = |- cvector_re = vector_map Re
+val cvector_im : thm = |- cvector_im = vector_map Im
+val vector_to_cvector : thm = |- vector_to_cvector = vector_map Cx
+val CVECTOR_RE_COMPONENT : thm = |- !x i. cvector_re x$i = Re (x$i)
+val CVECTOR_IM_COMPONENT : thm = |- !x i. cvector_im x$i = Im (x$i)
+val VECTOR_TO_CVECTOR_COMPONENT : thm =
+  |- !x i. vector_to_cvector x$i = Cx (x$i)
+val VECTOR_TO_CVECTOR_ZERO : thm = |- vector_to_cvector (vec 0) = mat 0
+val VECTOR_TO_CVECTOR_ZERO_EQ : thm =
+  |- !x. vector_to_cvector x = mat 0 <=> x = vec 0
+0..0..1..2..solved at 6
+0..0..1..2..solved at 6
+0..0..1..2..solved at 6
+0..0..1..2..solved at 6
+val CVECTOR_ZERO_VEC0 : thm =
+  |- !x. x = mat 0 <=> cvector_re x = vec 0 /\ cvector_im x = vec 0
+val VECTOR_TO_CVECTOR_MUL : thm =
+  |- !a x. vector_to_cvector (a % x) = Cx a % vector_to_cvector x
+0..0..1..2..solved at 6
+0..0..1..2..solved at 6
+0..0..1..2..solved at 6
+0..0..1..2..solved at 6
+val CVECTOR_EQ_SPLIT : thm =
+  |- !x y z.
+         x = vector_to_cvector y + ii % vector_to_cvector z <=>
+         cvector_re x = y /\ cvector_im x = z
+val CVECTOR_RE_VECTOR_TO_CVECTOR : thm =
+  |- !x. cvector_re (vector_to_cvector x) = x
+val CVECTOR_IM_VECTOR_TO_CVECTOR : thm =
+  |- !x. cvector_im (vector_to_cvector x) = vec 0
+val CVECTOR_IM_VECTOR_TO_CVECTOR_IM : thm =
+  |- !x. cvector_im (ii % vector_to_cvector x) = x
+val VECTOR_TO_CVECTOR_CVECTOR_RE_IM : thm =
+  |- !x. vector_to_cvector (cvector_re x) +
+         ii % vector_to_cvector (cvector_im x) =
+         x
+val CVECTOR_IM_VECTOR_TO_CVECTOR_RE_IM : thm =
+  |- !x y. cvector_im (vector_to_cvector x + ii % vector_to_cvector y) = y
+val CVECTOR_RE_VECTOR_TO_CVECTOR_RE_IM : thm =
+  |- !x y. cvector_re (vector_to_cvector x + ii % vector_to_cvector y) = x
+val CVECTOR_RE_ADD : thm =
+  |- !x y. cvector_re (x + y) = cvector_re x + cvector_re y
+val CVECTOR_IM_ADD : thm =
+  |- !x y. cvector_im (x + y) = cvector_im x + cvector_im y
+val CVECTOR_RE_MUL : thm = |- !a x. cvector_re (Cx a % x) = a % cvector_re x
+val CVECTOR_IM_MUL : thm = |- !a x. cvector_im (Cx a % x) = a % cvector_im x
+val CVECTOR_RE_VECTOR_MAP : thm =
+  |- !f v. cvector_re (vector_map f v) = vector_map (Re o f) v
+val CVECTOR_IM_VECTOR_MAP : thm =
+  |- !f v. cvector_im (vector_map f v) = vector_map (Im o f) v
+val VECTOR_MAP_CVECTOR_RE : thm =
+  |- !f v. vector_map f (cvector_re v) = vector_map (f o Re) v
+val VECTOR_MAP_CVECTOR_IM : thm =
+  |- !f v. vector_map f (cvector_im v) = vector_map (f o Im) v
+val CVECTOR_RE_VECTOR_MAP2 : thm =
+  |- !f v1 v2.
+         cvector_re (vector_map2 f v1 v2) =
+         vector_map2 (\x y. Re (f x y)) v1 v2
+val CVECTOR_IM_VECTOR_MAP2 : thm =
+  |- !f v1 v2.
+         cvector_im (vector_map2 f v1 v2) =
+         vector_map2 (\x y. Im (f x y)) v1 v2
+val cvector_flatten : thm =
+  |- !v. cvector_flatten v = pastecart (cvector_re v) (cvector_im v)
+val CVECTOR_FLATTEN_COMPONENT : thm =
+  |- (!v i. 1 <= i /\ i <= dimindex (:N) ==> cvector_flatten v$i = Re (v$i)) /\
+     (!v i.
+          dimindex (:N) + 1 <= i /\ i <= 2 * dimindex (:N)
+          ==> cvector_flatten v$i = Im (v$(i - dimindex (:N))))
+val FLATTEN_RE_IM_COMPONENT : thm =
+  |- !v i.
+         1 <= i /\ i <= 2 * dimindex (:N)
+         ==> cvector_flatten v$i =
+             (if i <= dimindex (:N)
+              then cvector_re v$i
+              else cvector_im v$(i - dimindex (:N)))
+val complex_vector : thm =
+  |- !v1 v2.
+         complex_vector (v1,v2) = vector_map2 (\x y. Cx x + ii * Cx y) v1 v2
+val COMPLEX_VECTOR_TRANSPOSE : thm =
+  |- !v1 v2.
+         complex_vector (v1,v2) =
+         vector_to_cvector v1 + ii % vector_to_cvector v2
+val cvector_unflatten : thm =
+  |- !v. cvector_unflatten v = complex_vector (fstcart v,sndcart v)
+val UNFLATTEN_FLATTEN : thm = |- cvector_unflatten o cvector_flatten = I
+val FLATTEN_UNFLATTEN : thm = |- cvector_flatten o cvector_unflatten = I
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+val FLATTEN_CLINEAR : thm =
+  |- !f. clinear f ==> linear (cvector_flatten o f o cvector_unflatten)
+val FLATTEN_MAP : thm =
+  |- !f g.
+         f = vector_map g
+         ==> (!x. cvector_flatten (vector_map f x) =
+                  vector_map g (cvector_flatten x))
+val FLATTEN_NEG : thm = |- !x. cvector_flatten (--x) = --cvector_flatten x
+val CVECTOR_NEG_ALT : thm =
+  |- !x. --x = cvector_unflatten (--cvector_flatten x)
+val FLATTEN_MAP2 : thm =
+  |- !f g.
+         f = vector_map2 g
+         ==> (!x y.
+                  cvector_flatten (vector_map2 f x y) =
+                  vector_map2 g (cvector_flatten x) (cvector_flatten y))
+val FLATTEN_ADD : thm =
+  |- !x y. cvector_flatten (x + y) = cvector_flatten x + cvector_flatten y
+val CVECTOR_ADD_ALT : thm =
+  |- !x y. x + y = cvector_unflatten (cvector_flatten x + cvector_flatten y)
+val FLATTEN_SUB : thm =
+  |- !x y. cvector_flatten (x - y) = cvector_flatten x - cvector_flatten y
+val CVECTOR_SUB_ALT : thm =
+  |- !x y. x - y = cvector_unflatten (cvector_flatten x - cvector_flatten y)
+val CVECTOR_CNJ_ADD : thm =
+  |- !x y. cvector_cnj (x + y) = cvector_cnj x + cvector_cnj y
+val CVECTOR_CNJ_SUB : thm =
+  |- !x y. cvector_cnj (x - y) = cvector_cnj x - cvector_cnj y
+val CVECTOR_CNJ_NEG : thm = |- !x. cvector_cnj (--x) = --cvector_cnj x
+val CVECTOR_RE_CNJ : thm = |- !x. cvector_re (cvector_cnj x) = cvector_re x
+val CVECTOR_IM_CNJ : thm = |- !x. cvector_im (cvector_cnj x) = --cvector_im x
+val CVECTOR_CNJ_CNJ : thm = |- !x. cvector_cnj (cvector_cnj x) = x
+- : unit = ()
+val ccross : thm =
+  |- !x y.
+         x ccross y =
+         vector
+         [x$2 * y$3 - x$3 * y$2; x$3 * y$1 - x$1 * y$3; x$1 * y$2 - x$2 * y$1]
+val CCROSS_COMPONENT : thm =
+  |- !x y.
+         (x ccross y)$1 = x$2 * y$3 - x$3 * y$2 /\
+         (x ccross y)$2 = x$3 * y$1 - x$1 * y$3 /\
+         (x ccross y)$3 = x$1 * y$2 - x$2 * y$1
+val CART_EQ3 : thm = |- !x y. x = y <=> x$1 = y$1 /\ x$2 = y$2 /\ x$3 = y$3
+val CCROSS_TAC : thm list -> tactic = <fun>
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+val CCROSS_LZERO : thm = |- !x. mat 0 ccross x = mat 0
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+val CCROSS_RZERO : thm = |- !x. x ccross mat 0 = mat 0
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+val CCROSS_SKEW : thm = |- !x y. x ccross y = --(y ccross x)
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+val CCROSS_REFL : thm = |- !x. x ccross x = mat 0
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+val CCROSS_LADD : thm = |- !x y z. (x + y) ccross z = x ccross z + y ccross z
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+val CCROSS_RADD : thm = |- !x y z. x ccross (y + z) = x ccross y + x ccross z
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+val CCROSS_LMUL : thm = |- !c x y. c % x ccross y = c % (x ccross y)
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+val CCROSS_RMUL : thm = |- !c x y. x ccross c % y = c % (x ccross y)
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+val CCROSS_LNEG : thm = |- !x y. --x ccross y = --(x ccross y)
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+val CCROSS_RNEG : thm = |- !x y. x ccross --y = --(x ccross y)
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+val CCROSS_JACOBI : thm =
+  |- !x y z.
+         x ccross y ccross z + y ccross z ccross x + z ccross x ccross y =
+         mat 0
+- : unit = ()
+- : unit = ()
+val cdot : thm =
+  |- !x y. x cdot y = vsum (1..dimindex (:N)) (\i. x$i * cnj (y$i))
+val CDOT_SYM : thm = |- !x y. x cdot y = cnj (y cdot x)
+val REAL_CDOT_SELF : thm = |- !x. real (x cdot x)
+val CDOT_LADD : thm = |- !x y z. (x + y) cdot z = x cdot z + y cdot z
+val CDOT_RADD : thm = |- !x y z. x cdot (y + z) = x cdot y + x cdot z
+val CDOT_LSUB : thm = |- !x y z. (x - y) cdot z = x cdot z - y cdot z
+val CDOT_RSUB : thm = |- !x y z. x cdot (y - z) = x cdot y - x cdot z
+val CDOT_LMUL : thm = |- !c x y. c % x cdot y = c * (x cdot y)
+val CDOT_RMUL : thm = |- !c x y. x cdot c % y = cnj c * (x cdot y)
+val CDOT_LNEG : thm = |- !x y. --x cdot y = --(x cdot y)
+val CDOT_RNEG : thm = |- !x y. x cdot --y = --(x cdot y)
+val CDOT_LZERO : thm = |- !x. mat 0 cdot x = Cx (&0)
+val CNJ_ZERO : thm = |- cnj (Cx (&0)) = Cx (&0)
+val CDOT_RZERO : thm = |- !x. x cdot mat 0 = Cx (&0)
+val CDOT3 : thm =
+  |- !x y. x cdot y = x$1 * cnj (y$1) + x$2 * cnj (y$2) + x$3 * cnj (y$3)
+0..0..1..2..5..11..28..50..solved at 70
+val ADD_CDOT_SYM : thm =
+  |- !x y. x cdot y + y cdot x = Cx (&2 * Re (x cdot y))
+val CCROSS_LREAL : thm =
+  |- !r c.
+         vector_to_cvector r ccross c =
+         vector_to_cvector (r cross cvector_re c) +
+         ii % vector_to_cvector (r cross cvector_im c)
+val CCROSS_RREAL : thm =
+  |- !r c.
+         c ccross vector_to_cvector r =
+         vector_to_cvector (cvector_re c cross r) +
+         ii % vector_to_cvector (cvector_im c cross r)
+val CDOT_LREAL : thm =
+  |- !r c.
+         vector_to_cvector r cdot c =
+         Cx (r dot cvector_re c) - ii * Cx (r dot cvector_im c)
+val CDOT_RREAL : thm =
+  |- !r c.
+         c cdot vector_to_cvector r =
+         Cx (cvector_re c dot r) + ii * Cx (cvector_im c dot r)
+val CDOT_LSUM : thm =
+  |- !s f y. FINITE s ==> msum s f cdot y = vsum s (\x. f x cdot y)
+val CDOT_RSUM : thm =
+  |- !s f x. FINITE s ==> x cdot msum s f = vsum s (\y. x cdot f y)
+val CNORM2 : thm = |- !v. norm v pow 2 = real_of_complex (v cdot v)
+val CX_CNORM2 : thm = |- !v. Cx (norm v pow 2) = v cdot v
+2 basis elements and 1 critical pairs
+3 basis elements and 2 critical pairs
+3 basis elements and 1 critical pairs
+4 basis elements and 0 critical pairs
+2 basis elements and 0 critical pairs
+val CNORM2_CVECTOR_ZERO : thm = |- norm (mat 0) = &0
+val CNORM2_MODULUS : thm =
+  |- !x. norm x pow 2 = vector_map norm x dot vector_map norm x
+val CNORM2_EQ_0 : thm = |- !x. norm x pow 2 = &0 <=> x = mat 0
+0..0..solved at 2
+val CDOT_EQ_0 : thm = |- !x. x cdot x = Cx (&0) <=> x = mat 0
+val CNORM2_POS : thm = |- !x. &0 <= norm x pow 2
+val CDOT_SELF_POS : thm = |- !x. &0 <= real_of_complex (x cdot x)
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+val CNORM2_MUL : thm =
+  |- !a x. norm (a % x) pow 2 = norm a pow 2 * norm x pow 2
+0..0..1..3..7..11..19..33..solved at 43
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+val CNORM2_NORM2_2 : thm =
+  |- !x y.
+         norm (vector_to_cvector x + ii % vector_to_cvector y) pow 2 =
+         norm x pow 2 + norm y pow 2
+val CNORM2_NORM2 : thm =
+  |- !v. norm v pow 2 = norm (cvector_re v) pow 2 + norm (cvector_im v) pow 2
+val CNORM2_ALT : thm = |- !x. norm x pow 2 = norm (x cdot x)
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+val CNORM2_SUB : thm = |- !x y. norm (x - y) pow 2 = norm (y - x) pow 2
+val CNORM2_VECTOR_TO_CVECTOR : thm =
+  |- !x. norm (vector_to_cvector x) pow 2 = norm x pow 2
+val CNORM : thm = |- !v. norm v = sqrt (real_of_complex (v cdot v))
+val CNORM_CVECTOR_ZERO : thm = |- norm (mat 0) = &0
+val CNORM_NORM_2 : thm =
+  |- !x y.
+         norm (vector_to_cvector x + ii % vector_to_cvector y) =
+         sqrt (norm x pow 2 + norm y pow 2)
+val CNORM_NORM : thm =
+  |- !v. norm v =
+         sqrt (norm (cvector_re v) pow 2 + norm (cvector_im v) pow 2)
+val CNORM_MUL : thm = |- !a x. norm (a % x) = norm a * norm x
+val CNORM_EQ_0 : thm = |- !x. norm x = &0 <=> x = mat 0
+val CNORM_POS : thm = |- !x. &0 <= norm x
+val CNORM_SUB : thm = |- !x y. norm (x - y) = norm (y - x)
+val CNORM_VECTOR_TO_CVECTOR : thm =
+  |- !x. norm (vector_to_cvector x) = norm x
+val CNORM_BASIS : thm =
+  |- !k. 1 <= k /\ k <= dimindex (:N)
+         ==> norm (vector_to_cvector (basis k)) = &1
+val CNORM_BASIS_1 : thm = |- norm (basis 1) = &1
+0..0..1..2..5..9..15..solved at 30
+val CVECTOR_CHOOSE_SIZE : thm = |- !c. &0 <= c ==> (?x. norm x = c)
+val cunit : thm = |- !X. cunit X = inv (Cx (norm X)) % X
+val CUNIT_CVECTOR_ZERO : thm = |- cunit (mat 0) = mat 0
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+val CDOT_CUNIT_MUL_CUNIT : thm = |- !x. (cunit x cdot x) % cunit x = x
+val collinear_cvectors : thm =
+  |- !x y. collinear_cvectors x y <=> (?a. y = a % x \/ x = a % y)
+0..0..solved at 2
+0..0..solved at 3
+0..0..solved at 2
+0..0..solved at 3
+val COLLINEAR_CVECTORS_SYM : thm =
+  |- !x y. collinear_cvectors x y <=> collinear_cvectors y x
+val COLLINEAR_CVECTORS_0 : thm = |- !x. collinear_cvectors x (mat 0)
+0..0..2..4..10..20..42..72..116..solved at 130
+0..0..solved at 3
+val NON_NULL_COLLINEARS : thm =
+  |- !x y.
+         collinear_cvectors x y /\ ~(x = mat 0) /\ ~(y = mat 0)
+         ==> (?a. ~(a = Cx (&0)) /\ y = a % x)
+0..0..2..4..solved at 8
+0..0..3..6..15..solved at 23
+val COLLINEAR_LNONNULL : thm =
+  |- !x y. collinear_cvectors x y /\ ~(x = mat 0) ==> (?a. y = a % x)
+0..0..2..4..12..solved at 17
+val COLLINEAR_RNONNULL : thm =
+  |- !x y. collinear_cvectors x y /\ ~(y = mat 0) ==> (?a. x = a % y)
+val COLLINEAR_RUNITREAL : thm =
+  |- !x y.
+         collinear_cvectors x (vector_to_cvector y) /\ norm y = &1
+         ==> x = (x cdot vector_to_cvector y) % vector_to_cvector y
+0..0..3..6..19..39..95..170..322..522..solved at 577
+0..0..3..6..19..39..96..172..331..542..solved at 556
+0..0..3..6..19..39..95..170..322..522..solved at 577
+0..0..3..6..19..39..96..172..331..542..solved at 556
+0..0..3..6..19..39..87..150..262..408..solved at 463
+0..0..3..6..19..39..88..152..271..428..solved at 442
+0..0..3..6..19..38..89..157..297..480..solved at 494
+0..0..3..6..19..38..solved at 51
+0..0..3..6..19..38..81..137..237..366..solved at 380
+0..0..3..6..19..38..solved at 51
+0..0..3..6..19..38..89..157..297..480..solved at 494
+0..0..3..6..19..38..solved at 51
+0..0..3..6..19..37..solved at 50
+0..0..3..6..19..37..solved at 44
+0..0..3..6..19..37..solved at 50
+0..0..3..6..19..37..solved at 44
+0..0..3..6..19..37..solved at 50
+0..0..3..6..19..37..solved at 44
+7 basis elements and 16 critical pairs
+8 basis elements and 17 critical pairs
+9 basis elements and 20 critical pairs
+10 basis elements and 22 critical pairs
+11 basis elements and 26 critical pairs
+12 basis elements and 31 critical pairs
+13 basis elements and 38 critical pairs
+14 basis elements and 40 critical pairs
+15 basis elements and 46 critical pairs
+16 basis elements and 53 critical pairs
+17 basis elements and 62 critical pairs
+18 basis elements and 66 critical pairs
+19 basis elements and 0 critical pairs
+7 basis elements and 16 critical pairs
+8 basis elements and 18 critical pairs
+9 basis elements and 20 critical pairs
+10 basis elements and 22 critical pairs
+11 basis elements and 26 critical pairs
+12 basis elements and 31 critical pairs
+13 basis elements and 37 critical pairs
+14 basis elements and 39 critical pairs
+15 basis elements and 0 critical pairs
+7 basis elements and 16 critical pairs
+8 basis elements and 17 critical pairs
+9 basis elements and 20 critical pairs
+10 basis elements and 22 critical pairs
+11 basis elements and 26 critical pairs
+12 basis elements and 31 critical pairs
+13 basis elements and 38 critical pairs
+14 basis elements and 39 critical pairs
+15 basis elements and 46 critical pairs
+16 basis elements and 53 critical pairs
+17 basis elements and 62 critical pairs
+18 basis elements and 66 critical pairs
+19 basis elements and 72 critical pairs
+20 basis elements and 81 critical pairs
+21 basis elements and 87 critical pairs
+22 basis elements and 0 critical pairs
+7 basis elements and 16 critical pairs
+8 basis elements and 18 critical pairs
+9 basis elements and 21 critical pairs
+10 basis elements and 24 critical pairs
+11 basis elements and 29 critical pairs
+12 basis elements and 35 critical pairs
+13 basis elements and 41 critical pairs
+14 basis elements and 42 critical pairs
+15 basis elements and 49 critical pairs
+16 basis elements and 56 critical pairs
+17 basis elements and 65 critical pairs
+18 basis elements and 68 critical pairs
+19 basis elements and 73 critical pairs
+20 basis elements and 83 critical pairs
+21 basis elements and 88 critical pairs
+22 basis elements and 98 critical pairs
+23 basis elements and 109 critical pairs
+24 basis elements and 120 critical pairs
+25 basis elements and 131 critical pairs
+26 basis elements and 143 critical pairs
+26 basis elements and 142 critical pairs
+27 basis elements and 154 critical pairs
+28 basis elements and 169 critical pairs
+28 basis elements and 168 critical pairs
+29 basis elements and 182 critical pairs
+30 basis elements and 0 critical pairs
+7 basis elements and 16 critical pairs
+8 basis elements and 18 critical pairs
+9 basis elements and 21 critical pairs
+10 basis elements and 24 critical pairs
+11 basis elements and 29 critical pairs
+12 basis elements and 35 critical pairs
+13 basis elements and 41 critical pairs
+14 basis elements and 42 critical pairs
+15 basis elements and 49 critical pairs
+16 basis elements and 56 critical pairs
+17 basis elements and 65 critical pairs
+18 basis elements and 68 critical pairs
+19 basis elements and 74 critical pairs
+20 basis elements and 84 critical pairs
+21 basis elements and 90 critical pairs
+22 basis elements and 100 critical pairs
+23 basis elements and 110 critical pairs
+24 basis elements and 121 critical pairs
+25 basis elements and 132 critical pairs
+26 basis elements and 144 critical pairs
+27 basis elements and 0 critical pairs
+7 basis elements and 16 critical pairs
+8 basis elements and 17 critical pairs
+9 basis elements and 19 critical pairs
+10 basis elements and 21 critical pairs
+11 basis elements and 26 critical pairs
+12 basis elements and 31 critical pairs
+13 basis elements and 38 critical pairs
+14 basis elements and 39 critical pairs
+15 basis elements and 45 critical pairs
+16 basis elements and 53 critical pairs
+17 basis elements and 63 critical pairs
+18 basis elements and 66 critical pairs
+19 basis elements and 71 critical pairs
+20 basis elements and 81 critical pairs
+21 basis elements and 86 critical pairs
+22 basis elements and 95 critical pairs
+23 basis elements and 106 critical pairs
+24 basis elements and 117 critical pairs
+25 basis elements and 127 critical pairs
+26 basis elements and 138 critical pairs
+26 basis elements and 137 critical pairs
+27 basis elements and 149 critical pairs
+28 basis elements and 164 critical pairs
+28 basis elements and 163 critical pairs
+29 basis elements and 177 critical pairs
+29 basis elements and 176 critical pairs
+30 basis elements and 186 critical pairs
+31 basis elements and 199 critical pairs
+31 basis elements and 198 critical pairs
+32 basis elements and 210 critical pairs
+33 basis elements and 0 critical pairs
+7 basis elements and 16 critical pairs
+8 basis elements and 18 critical pairs
+9 basis elements and 21 critical pairs
+10 basis elements and 24 critical pairs
+11 basis elements and 29 critical pairs
+12 basis elements and 35 critical pairs
+13 basis elements and 41 critical pairs
+14 basis elements and 47 critical pairs
+15 basis elements and 53 critical pairs
+16 basis elements and 61 critical pairs
+17 basis elements and 68 critical pairs
+18 basis elements and 0 critical pairs
+7 basis elements and 16 critical pairs
+8 basis elements and 18 critical pairs
+9 basis elements and 21 critical pairs
+10 basis elements and 24 critical pairs
+11 basis elements and 29 critical pairs
+12 basis elements and 35 critical pairs
+13 basis elements and 41 critical pairs
+14 basis elements and 47 critical pairs
+15 basis elements and 0 critical pairs
+7 basis elements and 16 critical pairs
+8 basis elements and 17 critical pairs
+9 basis elements and 19 critical pairs
+10 basis elements and 21 critical pairs
+11 basis elements and 26 critical pairs
+12 basis elements and 31 critical pairs
+13 basis elements and 38 critical pairs
+14 basis elements and 43 critical pairs
+15 basis elements and 50 critical pairs
+16 basis elements and 59 critical pairs
+17 basis elements and 66 critical pairs
+18 basis elements and 72 critical pairs
+19 basis elements and 0 critical pairs
+7 basis elements and 16 critical pairs
+8 basis elements and 17 critical pairs
+9 basis elements and 19 critical pairs
+10 basis elements and 21 critical pairs
+11 basis elements and 25 critical pairs
+12 basis elements and 31 critical pairs
+13 basis elements and 37 critical pairs
+14 basis elements and 42 critical pairs
+15 basis elements and 48 critical pairs
+16 basis elements and 57 critical pairs
+17 basis elements and 63 critical pairs
+18 basis elements and 68 critical pairs
+19 basis elements and 77 critical pairs
+20 basis elements and 81 critical pairs
+21 basis elements and 93 critical pairs
+22 basis elements and 105 critical pairs
+23 basis elements and 117 critical pairs
+24 basis elements and 128 critical pairs
+25 basis elements and 138 critical pairs
+25 basis elements and 137 critical pairs
+26 basis elements and 149 critical pairs
+27 basis elements and 161 critical pairs
+28 basis elements and 173 critical pairs
+29 basis elements and 0 critical pairs
+7 basis elements and 16 critical pairs
+8 basis elements and 17 critical pairs
+9 basis elements and 19 critical pairs
+10 basis elements and 21 critical pairs
+11 basis elements and 26 critical pairs
+12 basis elements and 31 critical pairs
+13 basis elements and 38 critical pairs
+14 basis elements and 43 critical pairs
+15 basis elements and 50 critical pairs
+16 basis elements and 59 critical pairs
+17 basis elements and 65 critical pairs
+18 basis elements and 71 critical pairs
+19 basis elements and 79 critical pairs
+20 basis elements and 83 critical pairs
+21 basis elements and 95 critical pairs
+22 basis elements and 107 critical pairs
+23 basis elements and 118 critical pairs
+24 basis elements and 129 critical pairs
+25 basis elements and 139 critical pairs
+26 basis elements and 0 critical pairs
+7 basis elements and 16 critical pairs
+8 basis elements and 17 critical pairs
+9 basis elements and 19 critical pairs
+10 basis elements and 21 critical pairs
+11 basis elements and 25 critical pairs
+12 basis elements and 31 critical pairs
+13 basis elements and 37 critical pairs
+14 basis elements and 42 critical pairs
+15 basis elements and 48 critical pairs
+16 basis elements and 57 critical pairs
+17 basis elements and 63 critical pairs
+18 basis elements and 68 critical pairs
+19 basis elements and 77 critical pairs
+20 basis elements and 80 critical pairs
+21 basis elements and 91 critical pairs
+22 basis elements and 103 critical pairs
+23 basis elements and 115 critical pairs
+24 basis elements and 125 critical pairs
+25 basis elements and 134 critical pairs
+25 basis elements and 133 critical pairs
+26 basis elements and 145 critical pairs
+27 basis elements and 157 critical pairs
+28 basis elements and 169 critical pairs
+28 basis elements and 168 critical pairs
+29 basis elements and 178 critical pairs
+30 basis elements and 188 critical pairs
+31 basis elements and 199 critical pairs
+32 basis elements and 0 critical pairs
+val CCROSS_COLLINEAR_CVECTORS : thm =
+  |- !x y. x ccross y = mat 0 <=> collinear_cvectors x y
+val CVECTOR_MUL_INV : thm =
+  |- !a x y. ~(a = Cx (&0)) /\ x = a % y ==> y = inv a % x
+0..0..solved at 3
+0..0..3..6..solved at 10
+val CVECTOR_MUL_INV2 : thm =
+  |- !a x y. ~(x = mat 0) /\ x = a % y ==> y = inv a % x
+0..0..2..4..solved at 8
+val COLLINEAR_CVECTORS_VECTOR_TO_CVECTOR : thm =
+  |- !x y.
+         collinear_cvectors (vector_to_cvector x) (vector_to_cvector y) <=>
+         collinear {vec 0, x, y}
+val corthogonal : thm = |- !x y. corthogonal x y <=> x cdot y = Cx (&0)
+0..0..1..3..5..12..22..37..64..96..145..231..350..solved at 370
+0..0..1..3..5..12..22..37..64..96..145..231..350..solved at 370
+val CORTHOGONAL_SYM : thm = |- !x y. corthogonal x y <=> corthogonal y x
+val CORTHOGONAL_0 : thm =
+  |- !x. corthogonal (mat 0) x /\ corthogonal x (mat 0)
+File "/home/maggesi/Devel/HOL/holy/cvectors/cvectors.hl", line 1268, characters 4-42:
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+[]
+val CORTHOGONAL_LZERO : thm = |- !x. corthogonal (mat 0) x
+val CORTHOGONAL_RZERO : thm = |- !x. corthogonal x (mat 0)
+val CORTHOGONAL_REFL : thm = |- !x. corthogonal x x <=> x = mat 0
+0..0..solved at 2
+0..0..solved at 3
+val CORTHOGONAL_COLLINEAR_CVECTORS : thm =
+  |- !x y.
+         collinear_cvectors x y /\ ~(x = mat 0) /\ ~(y = mat 0)
+         ==> ~corthogonal x y
+0..0..solved at 2
+0..0..solved at 3
+0..0..solved at 2
+0..0..solved at 3
+val CORTHOGONAL_MUL_CLAUSES : thm =
+  |- !x y a.
+         (corthogonal x y ==> corthogonal x (a % y)) /\
+         (corthogonal x y \/ a = Cx (&0) <=> corthogonal x (a % y)) /\
+         (corthogonal x y ==> corthogonal (a % x) y) /\
+         (corthogonal x y \/ a = Cx (&0) <=> corthogonal (a % x) y)
+File "/home/maggesi/Devel/HOL/holy/cvectors/cvectors.hl", line 1293, characters 4-84:
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+[]
+val CORTHOGONAL_RMUL : thm =
+  |- !x a y. corthogonal x y ==> corthogonal x (a % y)
+val CORTHOGONAL_RMUL_EQ : thm =
+  |- !x a y. corthogonal x y \/ a = Cx (&0) <=> corthogonal x (a % y)
+val CORTHOGONAL_LMUL : thm =
+  |- !a x y. corthogonal x y ==> corthogonal (a % x) y
+val CORTHOGONAL_LMUL_EQ : thm =
+  |- !a x y. corthogonal x y \/ a = Cx (&0) <=> corthogonal (a % x) y
+0..0..1..8..solved at 14
+0..0..1..8..solved at 14
+0..0..1..solved at 4
+0..0..1..solved at 6
+0..0..3..6..27..75..solved at 89
+val CORTHOGONAL_LRMUL_CLAUSES : thm =
+  |- !x y a b.
+         (corthogonal x y ==> corthogonal (a % x) (b % y)) /\
+         (corthogonal x y \/ a = Cx (&0) \/ b = Cx (&0) <=>
+          corthogonal (a % x) (b % y))
+File "/home/maggesi/Devel/HOL/holy/cvectors/cvectors.hl", line 1303, characters 4-45:
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+[]
+val CORTHOGONAL_LRMUL : thm =
+  |- !a x b y. corthogonal x y ==> corthogonal (a % x) (b % y)
+val CORTHOGONAL_LRMUL_EQ : thm =
+  |- !a x b y.
+         corthogonal x y \/ a = Cx (&0) \/ b = Cx (&0) <=>
+         corthogonal (a % x) (b % y)
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+3 basis elements and 0 critical pairs
+3 basis elements and 0 critical pairs
+3 basis elements and 0 critical pairs
+3 basis elements and 0 critical pairs
+val CORTHOGONAL_REAL_CLAUSES : thm =
+  |- !r c.
+         (corthogonal c (vector_to_cvector r) <=>
+          orthogonal (cvector_re c) r /\ orthogonal (cvector_im c) r) /\
+         (corthogonal (vector_to_cvector r) c <=>
+          orthogonal r (cvector_re c) /\ orthogonal r (cvector_im c))
+File "/home/maggesi/Devel/HOL/holy/cvectors/cvectors.hl", line 1317, characters 4-42:
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+[]
+val CORTHOGONAL_RREAL : thm =
+  |- !c r.
+         corthogonal c (vector_to_cvector r) <=>
+         orthogonal (cvector_re c) r /\ orthogonal (cvector_im c) r
+val CORTHOGONAL_LREAL : thm =
+  |- !r c.
+         corthogonal (vector_to_cvector r) c <=>
+         orthogonal r (cvector_re c) /\ orthogonal r (cvector_im c)
+0..0..solved at 2
+0..0..solved at 2
+0..0..solved at 3
+0..0..solved at 2
+0..0..solved at 2
+0..0..solved at 3
+val CORTHOGONAL_UNIT : thm =
+  |- !x y.
+         (corthogonal x (cunit y) <=> corthogonal x y) /\
+         (corthogonal (cunit x) y <=> corthogonal x y)
+File "/home/maggesi/Devel/HOL/holy/cvectors/cvectors.hl", line 1328, characters 4-42:
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+[]
+val CORTHOGONAL_RUNIT : thm =
+  |- !x y. corthogonal x (cunit y) <=> corthogonal x y
+val CORTHOGONAL_LUNIT : thm =
+  |- !x y. corthogonal (cunit x) y <=> corthogonal x y
+val CORTHOGONAL_PROJECTION : thm =
+  |- !x y. corthogonal (x - (x cdot cunit y) % cunit y) y
+0..0..1..2..5..11..26..46..76..solved at 96
+val CDOT_PYTHAGOREAN : thm =
+  |- !x y.
+         corthogonal x y ==> norm (x + y) pow 2 = norm x pow 2 + norm y pow 2
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+0..0..1..2..3..7..13..22..34..51..solved at 66
+0..0..1..2..6..12..25..42..69..solved at 85
+val CDOT_CAUCHY_SCHWARZ_POW_2 : thm =
+  |- !x y. norm (x cdot y) pow 2 <= norm x pow 2 * norm y pow 2
+val CDOT_CAUCHY_SCHWARZ : thm = |- !x y. norm (x cdot y) <= norm x * norm y
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+0..0..1..2..6..solved at 14
+0..0..1..2..6..12..25..42..69..solved at 85
+0..0..solved at 2
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+val CDOT_CAUCHY_SCHWARZ_POW_2_EQUAL : thm =
+  |- !x y.
+         norm (x cdot y) pow 2 = norm x pow 2 * norm y pow 2 <=>
+         collinear_cvectors x y
+val CDOT_CAUCHY_SCHWARZ_EQUAL : thm =
+  |- !x y. norm (x cdot y) = norm x * norm y <=> collinear_cvectors x y
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+0..0..1..2..solved at 6
+val CNORM_TRIANGLE : thm = |- !x y. norm (x + y) <= norm x + norm y
+0..0..1..solved at 4
+val REAL_ABS_SUB_CNORM : thm = |- !x y. abs (norm x - norm y) <= norm (x - y)
+val csummable : thm =
+  |- !s f.
+         csummable s f <=>
+         summable s (cvector_re o f) /\ summable s (cvector_im o f)
+val cinfsum : thm =
+  |- !s f.
+         cinfsum s f =
+         vector_to_cvector (infsum s (\x. cvector_re (f x))) +
+         ii % vector_to_cvector (infsum s (\x. cvector_im (f x)))
+val CSUMMABLE_FLATTEN_CVECTOR : thm =
+  |- !s f. csummable s f <=> summable s (cvector_flatten o f)
+val FLATTEN_CINFSUM : thm =
+  |- !s f.
+         csummable s f
+         ==> cinfsum s f = cvector_unflatten (infsum s (cvector_flatten o f))
+val CSUMMABLE_LINEAR : thm =
+  |- !f h s. csummable s f /\ clinear h ==> csummable s (h o f)
+val CINFSUM_LINEAR : thm =
+  |- !f h s.
+         csummable s f /\ clinear h ==> cinfsum s (h o f) = h (cinfsum s f)
+- : unit = ()
+val COMPLEX_VSUM_EQ_0 : thm =
+  |- !f s. (!x. x IN s ==> f x = Cx (&0)) ==> vsum s f = Cx (&0)
+val COMPLEX_VSUM_DELTA : thm =
+  |- !s a.
+         vsum s (\x. if x = a then b else Cx (&0)) =
+         (if a IN s then b else Cx (&0))
+val MSUM_COMPLEX_LMUL : thm =
+  |- !f c s. FINITE s ==> msum s (\x. c % f x) = c % msum s f
+val MSUM_COMPLEX_RMUL : thm =
+  |- !c s v. FINITE s ==> msum s (\x. c x % v) = vsum s c % v
+val CLINEAR_MSUM : thm =
+  |- !f g s. clinear f /\ FINITE s ==> f (msum s g) = msum s (f o g)
+val csubspace : thm =
+  |- !s. csubspace s <=>
+         mat 0 IN s /\
+         (!x y. x IN s /\ y IN s ==> x + y IN s) /\
+         (!c x. x IN s ==> c % x IN s)
+val cspan : thm = |- !s. cspan s = csubspace hull s
+val cdependent : thm =
+  |- !s. cdependent s <=> (?a. a IN s /\ a IN cspan (s DELETE a))
+val cindependent : thm = |- !s. cindependent s <=> ~cdependent s
+val CSUBSPACE_UNIV : thm = |- csubspace (:real^2^N)
+0..0..solved at 2
+val CSUBSPACE_IMP_NONEMPTY : thm = |- !s. csubspace s ==> ~(s = {})
+val CSUBSPACE_0 : thm = |- !s. csubspace s ==> mat 0 IN s
+val CSUBSPACE_ADD : thm =
+  |- !x y s. csubspace s /\ x IN s /\ y IN s ==> x + y IN s
+val CSUBSPACE_MUL : thm = |- !x c s. csubspace s /\ x IN s ==> c % x IN s
+val CSUBSPACE_NEG : thm = |- !x s. csubspace s /\ x IN s ==> --x IN s
+val CSUBSPACE_SUB : thm =
+  |- !x y s. csubspace s /\ x IN s /\ y IN s ==> x - y IN s
+val CSUBSPACE_MSUM : thm =
+  |- !s f t.
+         csubspace s /\ FINITE t /\ (!x. x IN t ==> f x IN s)
+         ==> msum t f IN s
+0..0..0..1..3..7..solved at 14
+0..0..0..1..5..15..38..70..126..solved at 254
+0..0..0..1..4..11..27..solved at 47
+val CSUBSPACE_CLINEAR_IMAGE : thm =
+  |- !f s. clinear f /\ csubspace s ==> csubspace (IMAGE f s)
+0..0..1..2..3..7..13..22..39..63..solved at 78
+0..0..1..2..3..7..15..32..71..133..221..491..solved at 738
+0..0..1..2..3..7..14..27..55..98..158..solved at 221
+val CSUBSPACE_CLINEAR_PREIMAGE : thm =
+  |- !f s. clinear f /\ csubspace s ==> csubspace {x | f x IN s}
+val CSUBSPACE_TRIVIAL : thm = |- csubspace {mat 0}
+0..0..solved at 2
+0..0..solved at 2
+0..0..1..2..solved at 6
+0..0..1..2..solved at 6
+0..0..1..solved at 4
+0..0..1..solved at 4
+val CSUBSPACE_INTER : thm =
+  |- !s t. csubspace s /\ csubspace t ==> csubspace (s INTER t)
+val CSUBSPACE_INTERS : thm =
+  |- !f. (!s. s IN f ==> csubspace s) ==> csubspace (INTERS f)
+0..0..1..2..6..12..27..52..102..176..340..568..1155..1991..solved at 2898
+0..0..1..2..7..15..34..solved at 41
+val CLINEAR_INJECTIVE_0_CSUBSPACE : thm =
+  |- !f s.
+         clinear f /\ csubspace s
+         ==> ((!x y. x IN s /\ y IN s /\ f x = f y ==> x = y) <=>
+              (!x. x IN s /\ f x = mat 0 ==> x = mat 0))
+0..0..2..solved at 6
+0..0..2..solved at 5
+0..0..2..4..6..solved at 11
+0..0..solved at 3
+0..0..solved at 2
+0..0..2..4..6..22..45..84..solved at 103
+0..0..2..4..6..22..45..84..solved at 135
+val CSUBSPACE_UNION_CHAIN : thm =
+  |- !s t.
+         csubspace s /\ csubspace t /\ csubspace (s UNION t)
+         ==> s SUBSET t \/ t SUBSET s
+val CSUBSPACE_PCROSS : thm =
+  |- !s t. csubspace s /\ csubspace t ==> csubspace (s PCROSS t)
+0..0..1..solved at 5
+0..0..1..solved at 5
+0..0..1..solved at 10
+0..0..2..solved at 8
+0..0..2..solved at 8
+0..0..2..solved at 12
+0..0..solved at 2
+0..0..0..0..solved at 4
+0..0..solved at 2
+0..0..0..0..solved at 4
+val CSUBSPACE_PCROSS_EQ : thm =
+  |- !s t. csubspace (s PCROSS t) <=> csubspace s /\ csubspace t
+val CSPAN_CSPAN : thm = |- !s. cspan (cspan s) = cspan s
+val CSPAN_MONO : thm = |- !s t. s SUBSET t ==> cspan s SUBSET cspan t
+val CSUBSPACE_CSPAN : thm = |- !s. csubspace (cspan s)
+val NONEMPTY_CSPAN : thm = |- !s. ~(cspan s = {})
+0..0..1..2..4..12..22..43..83..solved at 116
+0..0..1..solved at 4
+0..0..1..2..4..solved at 10
+0..0..1..2..solved at 6
+val CSPAN_CLAUSES : thm =
+  |- (!a s. a IN s ==> a IN cspan s) /\
+     mat 0 IN cspan s /\
+     (!x y s. x IN cspan s /\ y IN cspan s ==> x + y IN cspan s) /\
+     (!x c s. x IN cspan s ==> c % x IN cspan s)
+0..0..1..3..6..11..20..36..66..107..solved at 147
+val CSPAN_INDUCT : thm =
+  |- !s h.
+         (!x. x IN s ==> x IN h) /\ csubspace h
+         ==> (!x. x IN cspan s ==> h x)
+val CSPAN_EMPTY : thm = |- cspan {} = {mat 0}
+val CINDEPENDENT_EMPTY : thm = |- cindependent {}
+0..0..0..solved at 3
+val CINDEPENDENT_NONZERO : thm = |- !s. cindependent s ==> ~(mat 0 IN s)
+0..0..0..2..6..14..37..90..188..414..838..1695..3403..6688..13123..solved at 25797
+val CINDEPENDENT_MONO : thm =
+  |- !s t. cindependent t /\ s SUBSET t ==> cindependent s
+val CDEPENDENT_MONO : thm =
+  |- !s t. cdependent s /\ s SUBSET t ==> cdependent t
+0..0..1..2..6..12..22..36..53..78..134..205..308..solved at 361
+val CSPAN_CSUBSPACE : thm =
+  |- !b s. b SUBSET s /\ s SUBSET cspan b /\ csubspace s ==> cspan b = s
+0..0..1..2..3..13..25..39..77..135..209..329..531..792..1227..1826..2694..3991..6192..8815..solved at 8883
+0..0..1..4..7..22..51..121..278..693..solved at 1089
+0..0..solved at 2
+0..0..1..4..7..25..59..solved at 140
+0..0..1..4..7..28..70..191..solved at 355
+0..0..1..solved at 4
+0..0..1..4..solved at 10
+val CSPAN_INDUCT_ALT : thm =
+  |- !s h.
+         h (mat 0) /\ (!c x y. x IN s /\ h y ==> h (c % x + y))
+         ==> (!x. x IN cspan s ==> h x)
+0..0..1..solved at 4
+val CSPAN_SUPERSET : thm = |- !x. x IN s ==> x IN cspan s
+val CSPAN_INC : thm = |- !s. s SUBSET cspan s
+val CSPAN_UNION_SUBSET : thm =
+  |- !s t. cspan s UNION cspan t SUBSET cspan (s UNION t)
+val CSPAN_UNIV : thm = |- cspan (:real^2^N) = (:real^2^N)
+0..0..1..solved at 4
+val CSPAN_0 : thm = |- mat 0 IN cspan s
+0..0..1..2..3..solved at 8
+val CSPAN_ADD : thm =
+  |- !x y s. x IN cspan s /\ y IN cspan s ==> x + y IN cspan s
+0..0..1..2..solved at 6
+val CSPAN_MUL : thm = |- !x c s. x IN cspan s ==> c % x IN cspan s
+val CSPAN_MUL_EQ : thm =
+  |- !x c s. ~(c = Cx (&0)) ==> (c % x IN cspan s <=> x IN cspan s)
+0..0..1..2..solved at 6
+val CSPAN_NEG : thm = |- !x s. x IN cspan s ==> --x IN cspan s
+0..0..1..2..3..9..solved at 15
+0..0..1..solved at 4
+val CSPAN_NEG_EQ : thm = |- !x s. --x IN cspan s <=> x IN cspan s
+0..0..1..2..3..solved at 8
+val CSPAN_SUB : thm =
+  |- !x y s. x IN cspan s /\ y IN cspan s ==> x - y IN cspan s
+0..0..1..2..3..10..21..32..47..solved at 56
+val CSPAN_MSUM : thm =
+  |- !s f t.
+         FINITE t /\ (!x. x IN t ==> f x IN cspan s) ==> msum t f IN cspan s
+0..0..1..2..3..9..18..solved at 25
+0..0..1..2..solved at 6
+val CSPAN_ADD_EQ : thm =
+  |- !s x y. x IN cspan s ==> (x + y IN cspan s <=> y IN cspan s)
+0..0..1..2..solved at 6
+val CSPAN_EQ_SELF : thm = |- !s. cspan s = s <=> csubspace s
+val CSPAN_OF_CSUBSPACE : thm = |- !s. csubspace s ==> cspan s = s
+0..0..1..2..3..7..13..21..solved at 29
+val CSPAN_SUBSET_CSUBSPACE : thm =
+  |- !s t. s SUBSET t /\ csubspace t ==> cspan s SUBSET t
+val CSUBSPACE_TRANSLATION_SELF : thm =
+  |- !s a. csubspace s /\ a IN s ==> IMAGE (\x. a + x) s = s
+0..0..1..2..solved at 6
+0..0..1..solved at 4
+val CSUBSPACE_TRANSLATION_SELF_EQ : thm =
+  |- !s a. csubspace s ==> (IMAGE (\x. a + x) s = s <=> a IN s)
+0..0..0..0..3..7..solved at 13
+0..0..0..0..13..29..72..204..420..708..solved at 1668
+0..0..0..0..7..16..37..solved at 93
+val CSUBSPACE_SUMS : thm =
+  |- !s t.
+         csubspace s /\ csubspace t ==> csubspace {x + y | x IN s /\ y IN t}
+0..0..1..2..4..solved at 11
+0..0..1..2..4..solved at 11
+val CSPAN_UNION : thm =
+  |- !s t. cspan (s UNION t) = {x + y | x IN cspan s /\ y IN cspan t}
+0..0..0..2..solved at 6
+0..0..1..3..6..solved at 12
+val CSPAN_CLINEAR_IMAGE : thm =
+  |- !f s. clinear f ==> cspan (IMAGE f s) = IMAGE f (cspan s)
+0..0..1..2..6..12..solved at 24
+0..0..1..solved at 6
+0..0..1..3..7..solved at 12
+0..0..1..2..3..7..14..23..solved at 35
+0..0..0..solved at 3
+val CDEPENDENT_CLINEAR_IMAGE_EQ : thm =
+  |- !f s.
+         clinear f /\ (!x y. f x = f y ==> x = y)
+         ==> (cdependent (IMAGE f s) <=> cdependent s)
+0..0..1..2..6..12..solved at 24
+0..0..1..solved at 5
+0..0..1..2..5..12..22..solved at 33
+val CDEPENDENT_CLINEAR_IMAGE : thm =
+  |- !f s.
+         clinear f /\
+         (!x y. x IN s /\ y IN s /\ f x = f y ==> x = y) /\
+         cdependent s
+         ==> cdependent (IMAGE f s)
+val CINDEPENDENT_CLINEAR_IMAGE_EQ : thm =
+  |- !f s.
+         clinear f /\ (!x y. f x = f y ==> x = y)
+         ==> (cindependent (IMAGE f s) <=> cindependent s)
+0..0..1..5..21..58..156..solved at 208
+0..0..2..7..28..75..200..547..1413..6825..solved at 7803
+0..0..1..5..21..57..154..solved at 205
+0..0..1..5..21..59..162..492..1393..7500..25221..solved at 25726
+0..0..1..5..21..58..158..446..solved at 560
+val CSPAN_BREAKDOWN : thm =
+  |- !b s a. b IN s /\ a IN cspan s ==> (?k. a - k % b IN cspan (s DELETE b))
+0..0..solved at 2
+0..0..solved at 3
+0..0..1..3..9..24..60..194..solved at 443
+0..0..1..4..12..solved at 18
+val CSPAN_BREAKDOWN_EQ : thm =
+  |- !a s. x IN cspan (a INSERT s) <=> (?k. x - k % a IN cspan s)
+val CSPAN_INSERT_0 : thm = |- !s. cspan (mat 0 INSERT s) = cspan s
+val CSPAN_SING : thm = |- !a. cspan {a} = {u % a | u IN (:real^2)}
+val CSPAN_2 : thm =
+  |- !a b. cspan {a, b} = {u % a + v % b | u IN (:real^2) /\ v IN (:real^2)}
+val CSPAN_3 : thm =
+  |- !a b c.
+         cspan {a, b, c} =
+         {u % a + v % b + w % c | u IN (:real^2) /\
+                                  v IN (:real^2) /\
+                                  w IN (:real^2)}
+0..0..2..4..10..solved at 21
+0..0..3..13..43..solved at 56
+0..0..3..12..39..105..296..915..3059..solved at 4730
+val IN_CSPAN_INSERT : thm =
+  |- !a b s.
+         a IN cspan (b INSERT s) /\ ~(a IN cspan s)
+         ==> b IN cspan (a INSERT s)
+0..0..2..7..25..65..143..338..736..1612..3564..8063..solved at 11200
+val IN_CSPAN_DELETE : thm =
+  |- !a b s.
+         a IN cspan s /\ ~(a IN cspan (s DELETE b))
+         ==> b IN cspan (a INSERT (s DELETE b))
+0..0..1..2..4..13..25..51..solved at 75
+0..0..1..2..4..13..25..51..solved at 61
+val EQ_CSPAN_INSERT_EQ : thm =
+  |- !s x y. x - y IN cspan s ==> cspan (x INSERT s) = cspan (y INSERT s)
+0..0..1..4..12..37..102..311..915..2534..6580..17747..solved at 24126
+val CSPAN_TRANS : thm =
+  |- !x y s. x IN cspan s /\ y IN cspan (x INSERT s) ==> y IN cspan s
+0..0..solved at 2
+0..0..solved at 2
+0..0..solved at 2
+0..0..solved at 3
+0..0..1..4..9..solved at 16
+0..0..solved at 2
+0..0..1..solved at 4
+0..0..1..solved at 5
+0..0..solved at 3
+val CSPAN_EXPLICIT : thm =
+  |- !p. cspan p =
+         {y | ?s u. FINITE s /\ s SUBSET p /\ msum s (\v. u v % v) = y}
+2 basis elements and 0 critical pairs
+2 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+0..0..1..solved at 4
+0..0..1..solved at 6
+0..0..solved at 2
+0..0..2..solved at 6
+0..0..3..solved at 6
+0..0..solved at 3
+val CDEPENDENT_EXPLICIT : thm =
+  |- !p. cdependent p <=>
+         (?s u.
+              FINITE s /\
+              s SUBSET p /\
+              (?v. v IN s /\ ~(u v = Cx (&0))) /\
+              msum s (\v. u v % v) = mat 0)
+0..0..solved at 2
+0..0..1..solved at 4
+0..0..solved at 2
+0..0..1..2..7..solved at 12
+val CDEPENDENT_FINITE : thm =
+  |- !s. FINITE s
+         ==> (cdependent s <=>
+              (?u. (?v. v IN s /\ ~(u v = Cx (&0))) /\
+                   msum s (\v. u v % v) = mat 0))
+0..0..solved at 2
+0..0..1..solved at 4
+0..0..solved at 2
+val CSPAN_FINITE : thm =
+  |- !s. FINITE s ==> cspan s = {y | ?u. msum s (\v. u v % v) = y}
+val cbasis : thm =
+  |- !k. cbasis k = (lambda i. if i = k then Cx (&1) else Cx (&0))
+1 basis elements and 0 critical pairs
+1 basis elements and 0 critical pairs
+val NORM_CBASIS : thm =
+  |- !k. 1 <= k /\ k <= dimindex (:N) ==> norm (cbasis k) = &1
+val NORM_CBASIS_1 : thm = |- norm (cbasis 1) = &1
+val CVECTOR_CHOOSE_SIZE : thm = |- !c. &0 <= c ==> (?x. norm x = c)
+val CVECTOR_CHOOSE_DIST : thm = |- !x e. &0 <= e ==> (?y. norm (x - y) = e)
+val CBASIS_INJ : thm =
+  |- !i j.
+         1 <= i /\
+         i <= dimindex (:N) /\
+         1 <= j /\
+         j <= dimindex (:N) /\
+         cbasis i = cbasis j
+         ==> i = j
+0..0..1..2..5..9..15..solved at 28
+0..0..solved at 2
+val CBASIS_INJ_EQ : thm =
+  |- !i j.
+         1 <= i /\ i <= dimindex (:N) /\ 1 <= j /\ j <= dimindex (:N)
+         ==> (cbasis i = cbasis j <=> i = j)
+0..0..1..2..5..9..15..solved at 28
+val CBASIS_NE : thm =
+  |- !i j.
+         1 <= i /\
+         i <= dimindex (:N) /\
+         1 <= j /\
+         j <= dimindex (:N) /\
+         ~(i = j)
+         ==> ~(cbasis i = cbasis j)
+val CBASIS_COMPONENT : thm =
+  |- !k i.
+         1 <= i /\ i <= dimindex (:N)
+         ==> cbasis k$i = (if i = k then Cx (&1) else Cx (&0))
+val CBASIS_EXPANSION : thm =
+  |- !x. msum (1..dimindex (:N)) (\i. x$i % cbasis i) = x
+0..0..solved at 3
+0..0..solved at 3
+0..0..solved at 3
+0..0..solved at 3
+0..0..solved at 3
+0..0..solved at 3
+0..0..solved at 3
+0..0..solved at 3
+0..0..solved at 3
+0..0..solved at 3
+0..0..solved at 3
+0..0..solved at 3
+0..0..solved at 3
+0..0..solved at 3
+0..0..solved at 3
+0..0..solved at 3
+val BASIS_EXPANSION_UNIQUE : thm =
+  |- !f x.
+         msum (1..dimindex (:N)) (\i. f i % cbasis i) = x <=>
+         (!i. 1 <= i /\ i <= dimindex (:N) ==> f i = x$i)
+val CDOT_CBASIS : thm =
+  |- !x i.
+         1 <= i /\ i <= dimindex (:N)
+         ==> cbasis i cdot x = cnj (x$i) /\ x cdot cbasis i = x$i
+val CDOT_CBASIS_CBASIS : thm =
+  |- !i j.
+         1 <= i /\ i <= dimindex (:N) /\ 1 <= j /\ j <= dimindex (:N)
+         ==> cbasis i cdot cbasis j = (if i = j then Cx (&1) else Cx (&0))
+0..0..solved at 3
+val CDOT_CBASIS_CBASIS_UNEQUAL : thm =
+  |- !i j. ~(i = j) ==> cbasis i cdot cbasis j = Cx (&0)
+0..0..solved at 2
+0..0..solved at 2
+0..0..1..3..10..25..69..solved at 157
+0..0..solved at 2
+0..0..solved at 2
+0..0..solved at 2
+0..0..solved at 2
+val CBASIS_EQ_0 : thm = |- !i. cbasis i = mat 0 <=> ~(i IN 1..dimindex (:N))
+val BASIS_NONZERO : thm =
+  |- !k. 1 <= k /\ k <= dimindex (:N) ==> ~(cbasis k = mat 0)
+0..0..0..0..solved at 4
+val CSPAN_STDCBASIS : thm =
+  |- cspan {cbasis s | 1 <= s /\ s <= dimindex (:N)} = (:real^2^N)
+0..0..0..solved at 3
+0..0..0..solved at 3
+0..0..1..2..5..9..15..solved at 28
+val HAS_SIZE_STDCBASIS : thm =
+  |- {cbasis i | 1 <= i /\ i <= dimindex (:N)} HAS_SIZE dimindex (:N)
+0..0..1..solved at 4
+val FINITE_STDCBASIS : thm =
+  |- FINITE {cbasis i | 1 <= i /\ i <= dimindex (:N)}
+0..0..1..solved at 4
+val CARD_STDCBASIS : thm =
+  |- CARD {cbasis i | 1 <= i /\ i <= dimindex (:N)} = dimindex (:N)
+0..0..solved at 3
+0..0..solved at 3
+0..0..solved at 2
+0..0..0..solved at 3
+0..0..1..2..5..9..15..solved at 28
+0..0..solved at 2
+0..0..solved at 2
+0..0..2..4..10..27..70..151..375..841..2618..6278..19914..54205..177804..solved at 179711
+0..0..solved at 2
+0..0..solved at 2
+0..0..2..4..10..27..70..151..375..841..2618..6278..19912..54199..177762..solved at 179668
+val IN_CSPAN_IMAGE_CBASIS : thm =
+  |- !x s.
+         x IN cspan (IMAGE cbasis s) <=>
+         (!i. 1 <= i /\ i <= dimindex (:N) /\ ~(i IN s) ==> x$i = Cx (&0))
+0..0..0..solved at 3
+0..0..0..solved at 3
+0..0..1..3..7..15..solved at 24
+0..0..1..2..solved at 9
+0..0..1..2..5..9..15..solved at 28
+val CINDEPENDENT_STDCBASIS : thm =
+  |- cindependent {cbasis i | 1 <= i /\ i <= dimindex (:N)}
+0..0..0..solved at 3
+0..0..0..solved at 3
+val CINDEPENDENT_CBASIS_IMAGE : thm =
+  |- !k. cindependent (IMAGE cbasis k) <=> k SUBSET 1..dimindex (:N)
+0..0..solved at 2
+0..0..solved at 3
+0..0..solved at 2
+0..0..solved at 2
+0..0..solved at 4
+0..0..solved at 2
+0..0..solved at 2
+0..0..solved at 2
+0..0..solved at 3
+0..0..solved at 2
+0..0..solved at 2
+0..0..solved at 2
+0..0..solved at 2
+0..0..solved at 3
+0..0..solved at 2
+0..0..solved at 2
+0..0..solved at 2
+0..0..solved at 3
+0..0..solved at 2
+0..0..solved at 2
+0..0..solved at 2
+0..0..solved at 2
+0..0..solved at 2
+0..0..2..4..12..26..46..solved at 53
+0..0..1..4..9..26..69..185..457..1087..2543..solved at 3053
+0..0..3..8..16..33..59..95..160..261..solved at 392
+val CINDEPENDENT_INSERT : thm =
+  |- !a s.
+         cindependent (a INSERT s) <=>
+         (if a IN s
+          then cindependent s
+          else cindependent s /\ ~(a IN cspan s))
+0..0..2..7..18..49..113..244..495..949..1817..3533..6723..13038..25662..50235..102596..solved at 143954
+val CSPANNING_SUBSET_CINDEPENDENT : thm =
+  |- !s t. t SUBSET s /\ cindependent s /\ s SUBSET cspan t ==> s = t
+0..0..solved at 2
+0..0..solved at 3
+0..0..solved at 3
+0..0..solved at 2
+0..0..solved at 2
+0..0..solved at 2
+0..0..solved at 3
+0..0..solved at 2
+0..0..solved at 2
+0..0..solved at 4
+0..0..solved at 2
+0..0..solved at 2
+0..0..solved at 3
+0..0..solved at 2
+0..0..solved at 2
+0..0..solved at 3
+0..0..solved at 2
+0..0..0..0..0..1..6..solved at 13
+0..0..1..2..3..8..15..24..39..56..77..107..139..175..solved at 257
+0..0..2..solved at 5
+0..0..3..11..36..110..329..solved at 573
+0..0..4..12..30..90..solved at 165
+0..0..2..4..solved at 8
+0..0..3..10..21..60..139..303..682..1331..2680..5837..solved at 7150
+0..0..solved at 3
+0..0..4..12..28..solved at 34
+0..0..5..solved at 8
+0..0..6..14..30..80..solved at 90
+0..0..6..14..29..76..145..solved at 154
+0..0..solved at 2
+0..0..7..14..23..62..123..223..407..675..solved at 698
+val EXCHANGE_LEMMA : thm =
+  |- !s t.
+         FINITE t /\ cindependent s /\ s SUBSET cspan t
+         ==> (?t'. t' HAS_SIZE CARD t /\
+                   s SUBSET t' /\
+                   t' SUBSET s UNION t /\
+                   s SUBSET cspan t')
+0..0..1..3..9..solved at 20
+0..0..1..2..4..10..17..27..50..solved at 75
+val CINDEPENDENT_CSPAN_BOUND : thm =
+  |- !s t.
+         FINITE t /\ cindependent s /\ s SUBSET cspan t
+         ==> FINITE s /\ CARD s <= CARD t
+val CINDEPENDENT_BOUND : thm =
+  |- !s. cindependent s ==> FINITE s /\ CARD s <= dimindex (:N)
+0..0..solved at 3
+0..0..solved at 2
+0..0..solved at 3
+0..0..solved at 2
+val CDEPENDENT_BIGGERSET : thm =
+  |- !s. (FINITE s ==> CARD s > dimindex (:N)) ==> cdependent s
+val CINDEPENDENT_IMP_FINITE : thm = |- !s. cindependent s ==> FINITE s
+0..0..2..solved at 5
+0..0..2..solved at 6
+0..0..solved at 3
+0..0..1..2..solved at 6
+0..0..1..2..solved at 6
+val CINDEPENDENT_EXPLICIT : thm =
+  |- !b. cindependent b <=>
+         FINITE b /\
+         (!c. msum b (\v. c v % v) = mat 0 ==> (!v. v IN b ==> c v = Cx (&0)))
+val CINDEPENDENT_SING : thm = |- !x. cindependent {x} <=> ~(x = mat 0)
+0..0..1..5..solved at 9
+0..0..1..5..solved at 9
+val CDEPENDENT_SING : thm = |- !x. cdependent {x} <=> x = mat 0
+0..0..solved at 2
+0..0..solved at 4
+0..0..solved at 3
+0..0..solved at 4
+0..0..solved at 2
+0..0..solved at 2
+0..0..solved at 2
+0..0..solved at 2
+0..0..solved at 2
+0..0..solved at 4
+0..0..solved at 3
+0..0..solved at 4
+0..0..solved at 2
+0..0..solved at 6
+0..0..solved at 5
+0..0..solved at 6
+val CDEPENDENT_2 : thm =
+  |- !a b.
+         cdependent {a, b} <=>
+         (if a = b
+          then a = mat 0
+          else ?x y. x % a + y % b = mat 0 /\ ~(x = Cx (&0) /\ y = Cx (&0)))
+0..0..solved at 2
+0..0..solved at 2
+0..0..solved at 2
+0..0..solved at 2
+0..0..solved at 2
+0..0..solved at 2
+0..0..solved at 3
+0..0..solved at 4
+0..0..solved at 3
+0..0..solved at 4
+0..0..solved at 3
+0..0..solved at 4
+0..0..solved at 3
+0..0..solved at 4
+0..0..solved at 3
+0..0..solved at 4
+0..0..solved at 3
+0..0..solved at 4
+0..0..solved at 3
+0..0..solved at 4
+0..0..solved at 3
+0..0..solved at 4
+0..0..solved at 3
+0..0..solved at 4
+0..0..solved at 3
+0..0..solved at 4
+0..0..solved at 3
+0..0..solved at 4
+0..0..solved at 3
+0..0..solved at 4
+0..0..solved at 3
+0..0..solved at 4
+0..0..solved at 3
+0..0..solved at 4
+0..0..solved at 3
+0..0..solved at 4
+0..0..solved at 4
+0..0..solved at 5
+0..0..solved at 4
+0..0..solved at 5
+0..0..solved at 4
+0..0..solved at 5
+0..0..solved at 4
+0..0..solved at 5
+0..0..solved at 4
+0..0..solved at 5
+0..0..solved at 4
+0..0..solved at 5
+0..0..7..14..solved at 20
+0..0..solved at 2
+0..0..7..14..solved at 18
+0..0..solved at 2
+0..0..7..14..41..solved at 50
+0..0..solved at 2
+val CDEPENDENT_3 : thm =
+  |- !a b c.
+         ~(a = b) /\ ~(a = c) /\ ~(b = c)
+         ==> (cdependent {a, b, c} <=>
+              (?x y z.
+                   x % a + y % b + z % c = mat 0 /\
+                   ~(x = Cx (&0) /\ y = Cx (&0) /\ z = Cx (&0))))
+0..0..2..solved at 6
+0..0..2..solved at 5
+0..0..2..4..12..25..61..114..solved at 174
+val CINDEPENDENT_2 : thm =
+  |- !a b x y.
+         cindependent {a, b} /\ ~(a = b)
+         ==> (x % a + y % b = mat 0 <=> x = Cx (&0) /\ y = Cx (&0))
+0..0..4..solved at 9
+0..0..4..solved at 8
+0..0..4..solved at 7
+0..0..4..8..24..49..115..210..430..730..1537..2607..solved at 3598
+val CINDEPENDENT_3 : thm =
+  |- !a b c x y z.
+         cindependent {a, b, c} /\ ~(a = b) /\ ~(a = c) /\ ~(b = c)
+         ==> (x % a + y % b + z % c = mat 0 <=>
+              x = Cx (&0) /\ y = Cx (&0) /\ z = Cx (&0))
+0..0..0..0..0..solved at 5
+0..0..0..0..0..1..solved at 7
+0..0..2..solved at 6
+0..0..solved at 2
+val MAXIMAL_CINDEPENDENT_SUBSET_EXTEND : thm =
+  |- !s v.
+         s SUBSET v /\ cindependent s
+         ==> (?b. s SUBSET b /\
+                  b SUBSET v /\
+                  cindependent b /\
+                  v SUBSET cspan b)
+val MAXIMAL_CINDEPENDENT_SUBSET : thm =
+  |- !v. ?b. b SUBSET v /\ cindependent b /\ v SUBSET cspan b
+0..0..1..2..6..11..21..solved at 28
+0..0..1..2..solved at 6
+0..0..1..2..solved at 6
+0..0..1..2..solved at 6
+0..0..1..2..solved at 6
+val CLINEAR_CSUBSPACE_GRAPH : thm =
+  |- !f. clinear f <=> csubspace {pastecart x (f x) | x IN (:real^2^M)}
+val cdim : thm =
+  |- !v. cdim v =
+         (@n. ?b. b SUBSET v /\
+                  cindependent b /\
+                  v SUBSET cspan b /\
+                  b HAS_SIZE n)
+0..0..0..0..0..4..9..15..solved at 23
+val CBASIS_EXISTS : thm =
+  |- !v. ?b. b SUBSET v /\
+             cindependent b /\
+             v SUBSET cspan b /\
+             b HAS_SIZE cdim v
+0..0..0..0..0..0..1..solved at 8
+val CBASIS_EXISTS_FINITE : thm =
+  |- !v. ?b. FINITE b /\
+             b SUBSET v /\
+             cindependent b /\
+             v SUBSET cspan b /\
+             b HAS_SIZE cdim v
+0..0..1..solved at 4
+0..0..1..2..3..7..13..21..solved at 29
+val CBASIS_CSUBSPACE_EXISTS : thm =
+  |- !s. csubspace s
+         ==> (?b. FINITE b /\
+                  b SUBSET s /\
+                  cindependent b /\
+                  cspan b = s /\
+                  b HAS_SIZE cdim s)
+0..0..1..3..7..12..solved at 24
+0..0..1..2..3..7..12..17..29..45..63..85..solved at 99
+val CINDEPENDENT_CARD_LE_CDIM : thm =
+  |- !v b. b SUBSET v /\ cindependent b ==> FINITE b /\ CARD b <= cdim v
+0..0..1..2..3..7..12..17..30..52..76..solved at 95
+val CSPAN_CARD_GE_CDIM : thm =
+  |- !v b. v SUBSET cspan b /\ FINITE b ==> cdim v <= CARD b
+0..0..1..2..solved at 6
+0..0..1..2..6..11..19..34..49..68..solved at 83
+val CBASIS_CARD_EQ_CDIM : thm =
+  |- !v b.
+         b SUBSET v /\ v SUBSET cspan b /\ cindependent b
+         ==> FINITE b /\ CARD b = cdim v
+val CBASIS_HAS_SIZE_CDIM : thm =
+  |- !v b. cindependent b /\ cspan b = v ==> b HAS_SIZE cdim v
+0..0..1..2..5..9..15..32..solved at 53
+val CDIM_UNIQUE : thm =
+  |- !v b.
+         b SUBSET v /\ v SUBSET cspan b /\ cindependent b /\ b HAS_SIZE n
+         ==> cdim v = n
+val CDIM_LE_CARD : thm = |- !s. FINITE s ==> cdim s <= CARD s
+val CDIM_UNIV : thm = |- cdim (:real^2^N) = dimindex (:N)
+0..0..1..2..3..7..12..17..31..55..85..121..174..251..365..514..724..1023..1575..solved at 1907
+val CDIM_SUBSET : thm = |- !s t. s SUBSET t ==> cdim s <= cdim t
+val CDIM_SUBSET_UNIV : thm = |- !s. cdim s <= dimindex (:N)
+val CBASIS_HAS_SIZE_UNIV : thm =
+  |- !b. cindependent b /\ cspan b = (:real^2^N) ==> b HAS_SIZE dimindex (:N)
+0..0..1..solved at 4
+0..0..2..4..11..22..37..solved at 45
+0..0..1..solved at 4
+0..0..2..solved at 9
+val CARD_GE_CDIM_CINDEPENDENT : thm =
+  |- !v b.
+         b SUBSET v /\ cindependent b /\ cdim v <= CARD b
+         ==> v SUBSET cspan b
+0..0..solved at 2
+0..0..solved at 3
+0..0..solved at 2
+0..0..solved at 2
+0..0..0..solved at 4
+0..0..1..2..solved at 6
+val CARD_LE_CDIM_CSPANNING : thm =
+  |- !v b.
+         v SUBSET cspan b /\ FINITE b /\ CARD b <= cdim v ==> cindependent b
+0..0..1..2..3..solved at 8
+0..0..1..2..3..solved at 8
+val CARD_EQ_CDIM : thm =
+  |- !v b.
+         b SUBSET v /\ b HAS_SIZE cdim v
+         ==> (cindependent b <=> v SUBSET cspan b)
+0..0..1..solved at 4
+0..0..1..2..solved at 6
+val CINDEPENDENT_BOUND_GENERAL : thm =
+  |- !s. cindependent s ==> FINITE s /\ CARD s <= cdim s
+0..0..solved at 3
+0..0..solved at 2
+0..0..solved at 3
+0..0..solved at 2
+val CDEPENDENT_BIGGERSET_GENERAL : thm =
+  |- !s. (FINITE s ==> CARD s > cdim s) ==> cdependent s
+0..0..1..4..9..solved at 14
+val CDIM_CSPAN : thm = |- !s. cdim (cspan s) = cdim s
+val CDIM_INSERT_0 : thm = |- !s. cdim (mat 0 INSERT s) = cdim s
+val CDIM_EQ_CARD : thm = |- !s. cindependent s ==> cdim s = CARD s
+val CDEPENDENT_EQ_CDIM_LT_CARD : thm =
+  |- !s. cdependent s <=> FINITE s ==> cdim s < CARD s
+val CINDEPENDENT_EQ_CDIM_EQ_CARD : thm =
+  |- !s. cindependent s <=> FINITE s /\ cdim s = CARD s
+0..0..1..3..5..14..solved at 29
+val SUBSET_LE_CDIM : thm = |- !s t. s SUBSET cspan t ==> cdim s <= cdim t
+0..0..1..3..8..20..42..solved at 77
+val CSPAN_EQ_CDIM : thm = |- !s t. cspan s = cspan t ==> cdim s = cdim t
+val CSPANS_IMAGE : thm =
+  |- !f b v.
+         clinear f /\ v SUBSET cspan b ==> IMAGE f v SUBSET cspan (IMAGE f b)
+0..0..1..2..solved at 6
+0..0..1..solved at 4
+val CDIM_CLINEAR_IMAGE_LE : thm =
+  |- !f s. clinear f ==> cdim (IMAGE f s) <= cdim s
+val CDIM_EMPTY : thm = |- cdim {} = 0
+0..0..1..5..12..32..solved at 40
+0..0..1..5..12..31..solved at 54
+0..0..2..6..solved at 11
+0..0..2..7..18..47..105..235..544..1227..2830..6719..solved at 12516
+0..0..2..4..solved at 8
+0..0..solved at 2
+0..0..solved at 2
+0..0..2..5..11..32..71..165..solved at 255
+0..0..2..5..solved at 14
+val CDIM_INSERT : thm =
+  |- !x s. cdim (x INSERT s) = (if x IN cspan s then cdim s else cdim s + 1)
+val CDIM_SING : thm = |- !x. cdim {x} = (if x = mat 0 then 0 else 1)
+0..0..1..4..10..25..54..112..solved at 125
+val CDIM_EQ_0 : thm = |- !s. cdim s = 0 <=> s SUBSET {mat 0}
+0..0..1..solved at 4
+0..0..solved at 4
+0..0..3..solved at 8
+val CHOOSE_CSUBSPACE_OF_CSUBSPACE : thm =
+  |- !s n.
+         n <= cdim s ==> (?t. csubspace t /\ t SUBSET cspan s /\ cdim t = n)
+0..0..0..solved at 3
+val CSUBSPACE_EXISTS : thm =
+  |- !n. n <= dimindex (:N) ==> (?s. csubspace s /\ cdim s = n)
+0..0..1..2..solved at 6
+val CSPANNING_SURJECTIVE_IMAGE : thm =
+  |- !f s.
+         (:real^2^M) SUBSET cspan s /\ clinear f /\ (!y. ?x. f x = y)
+         ==> (:real^2^N) SUBSET cspan (IMAGE f s)
+0..0..0..0..solved at 4
+0..0..0..0..0..solved at 5
+0..0..2..solved at 6
+0..0..2..4..10..19..32..52..75..102..140..180..230..305..solved at 341
+val CINDEPENDENT_INJECTIVE_IMAGE_GEN : thm =
+  |- !f s.
+         cindependent s /\
+         clinear f /\
+         (!x y. x IN cspan s /\ y IN cspan s /\ f x = f y ==> x = y)
+         ==> cindependent (IMAGE f s)
+0..0..solved at 2
+0..0..solved at 2
+0..0..1..solved at 4
+val CINDEPENDENT_INJECTIVE_IMAGE : thm =
+  |- !f s.
+         cindependent s /\ clinear f /\ (!x y. f x = f y ==> x = y)
+         ==> cindependent (IMAGE f s)
+val CVECTOR_SUB_PROJECT_ORTHOGONAL : thm =
+  |- !b x. b cdot (x - (x cdot b) / (b cdot b) % b) = Cx (&0)
+3 basis elements and 0 critical pairs
+0..0..solved at 2
+0..0..solved at 2
+0..0..solved at 2
+0..0..solved at 3
+3 basis elements and 0 critical pairs
+0..0..solved at 2
+0..0..solved at 2
+0..0..solved at 2
+0..0..solved at 3
+0..0..solved at 3
+0..0..3..6..13..solved at 21
+val CBASIS_CORTHOGONAL : thm =
+  |- !b. FINITE b
+         ==> (?c. FINITE c /\
+                  CARD c <= CARD b /\
+                  cspan c = cspan b /\
+                  pairwise corthogonal c)
+0..0..1..solved at 4
+0..0..1..3..5..16..solved at 32
+0..0..1..2..5..12..24..44..80..132..221..solved at 308
+0..0..1..2..5..14..33..81..solved at 142
+0..0..1..2..5..solved at 12
+0..0..1..3..7..26..solved at 58
+val CORTHOGONAL_CBASIS_EXISTS : thm =
+  |- !v. ?b. cindependent b /\
+             b SUBSET cspan v /\
+             v SUBSET cspan b /\
+             b HAS_SIZE cdim v /\
+             pairwise corthogonal b
+0..0..1..2..solved at 6
+0..0..1..2..solved at 6
+0..0..1..3..7..24..solved at 54
+0..0..1..3..7..24..solved at 54
+val CSPAN_EQ : thm =
+  |- !s t. cspan s = cspan t <=> s SUBSET cspan t /\ t SUBSET cspan s
+0..0..solved at 2
+0..0..solved at 2
+0..0..solved at 2
+0..0..solved at 2
+0..0..1..4..7..15..23..39..solved at 47
+val CSPAN_EQ_INSERT : thm =
+  |- !s x. cspan (x INSERT s) = cspan s <=> x IN cspan s
+val CSPAN_SPECIAL_SCALE : thm =
+  |- !s a x.
+         cspan ((a % x) INSERT s) =
+         (if a = Cx (&0) then cspan s else cspan (x INSERT s))
+0..0..solved at 3
+0..0..solved at 2
+0..0..solved at 2
+0..0..solved at 2
+0..0..solved at 3
+0..0..solved at 2
+0..0..solved at 2
+0..0..2..4..10..24..43..102..201..377..707..1390..solved at 1550
+0..0..2..4..11..23..42..102..solved at 129
+0..0..2..4..6..14..25..38..61..86..112..solved at 140
+0..0..2..4..10..25..52..solved at 59
+0..0..solved at 2
+0..0..3..6..17..34..solved at 48
+0..0..solved at 2
+0..0..solved at 2
+0..0..3..solved at 9
+0..0..3..6..16..32..56..116..205..solved at 252
+val CLINEAR_INDEP_IMAGE_LEMMA : thm =
+  |- !f b.
+         clinear f /\
+         FINITE b /\
+         cindependent (IMAGE f b) /\
+         (!x y. x IN b /\ y IN b /\ f x = f y ==> x = y)
+         ==> (!x. x IN cspan b ==> f x = mat 0 ==> x = mat 0)
+2 basis elements and 0 critical pairs
+2 basis elements and 0 critical pairs
+0..0..3..solved at 6
+0..0..3..8..solved at 13
+0..0..3..8..solved at 12
+0..0..3..solved at 6
+0..0..3..solved at 6
+val CLINEAR_CINDEPENDENT_EXTEND_LEMMA : thm =
+  |- !f b.
+         FINITE b
+         ==> cindependent b
+         ==> (?g. (!x y.
+                       x IN cspan b /\ y IN cspan b ==> g (x + y) = g x + g y) /\
+                  (!x c. x IN cspan b ==> g (c % x) = c % g x) /\
+                  (!x. x IN b ==> g x = f x))
+0..0..0..0..3..8..17..32..59..solved at 68
+val CLINEAR_CINDEPENDENT_EXTEND : thm =
+  |- !f b. cindependent b ==> (?g. clinear g /\ (!x. x IN b ==> g x = f x))
+0..0..1..2..6..13..26..44..66..90..128..solved at 173
+val CLINEAR_CINDEPENDENT_EXTEND_GEN : thm =
+  |- !f b s.
+         (!i j. i IN s /\ j IN s /\ b i = b j ==> f i = f j) /\
+         cindependent {b i | i IN s}
+         ==> (?g. clinear g /\ (!i. i IN s ==> g (b i) = f i))
+0..0..1..3..7..15..26..46..solved at 62
+val CLINEAR_CBASIS_EXTEND : thm =
+  |- !f. ?g. clinear g /\
+             (!i. 1 <= i /\ i <= dimindex (:M) ==> g (cbasis i) = f i)
+0..0..1..solved at 4
+val CSUBSPACE_KERNEL : thm = |- !f. clinear f ==> csubspace {x | f x = mat 0}
+val CLINEAR_EQ_0_CSPAN : thm =
+  |- !f b.
+         clinear f /\ (!x. x IN b ==> f x = mat 0)
+         ==> (!x. x IN cspan b ==> f x = mat 0)
+0..0..1..3..7..17..35..57..91..141..209..369..608..solved at 846
+val CLINEAR_EQ_0 : thm =
+  |- !f b s.
+         clinear f /\ s SUBSET cspan b /\ (!x. x IN b ==> f x = mat 0)
+         ==> (!x. x IN s ==> f x = mat 0)
+0..0..1..2..solved at 6
+0..0..0..2..5..solved at 10
+val CLINEAR_EQ : thm =
+  |- !f g b s.
+         clinear f /\
+         clinear g /\
+         s SUBSET cspan b /\
+         (!x. x IN b ==> f x = g x)
+         ==> (!x. x IN s ==> f x = g x)
+0..0..1..2..solved at 6
+val CLINEAR_EQ_STDCBASIS : thm =
+  |- !f g.
+         clinear f /\
+         clinear g /\
+         (!i. 1 <= i /\ i <= dimindex (:M) ==> f (cbasis i) = g (cbasis i))
+         ==> f = g
+val CSUBSPACE_CLINEAR_FIXED_POINTS : thm =
+  |- !f. clinear f ==> csubspace {x | f x = x}
+val cbilinear : thm =
+  |- !f. cbilinear f <=>
+         (!x. clinear (\y. f x y)) /\ (!y. clinear (\x. f x y))
+0..0..solved at 2
+0..0..solved at 2
+0..0..solved at 2
+0..0..solved at 2
+val CBILINEAR_SWAP : thm = |- !op. cbilinear (\x y. op y x) <=> cbilinear op
+val CBILINEAR_LADD : thm =
+  |- !h x y z. cbilinear h ==> h (x + y) z = h x z + h y z
+val CBILINEAR_RADD : thm =
+  |- !h x y z. cbilinear h ==> h x (y + z) = h x y + h x z
+val CBILINEAR_LMUL : thm =
+  |- !h c x y. cbilinear h ==> h (c % x) y = c % h x y
+val CBILINEAR_RMUL : thm =
+  |- !h c x y. cbilinear h ==> h x (c % y) = c % h x y
+val CBILINEAR_LNEG : thm = |- !h x y. cbilinear h ==> h (--x) y = --h x y
+val CBILINEAR_RNEG : thm = |- !h x y. cbilinear h ==> h x (--y) = --h x y
+val CBILINEAR_LZERO : thm = |- !h x. cbilinear h ==> h (mat 0) x = mat 0
+val CBILINEAR_RZERO : thm = |- !h x. cbilinear h ==> h x (mat 0) = mat 0
+val CBILINEAR_LSUB : thm =
+  |- !h x y z. cbilinear h ==> h (x - y) z = h x z - h y z
+val CBILINEAR_RSUB : thm =
+  |- !h x y z. cbilinear h ==> h x (y - z) = h x y - h x z
+val CBILINEAR_LSUM : thm =
+  |- !bop f s y.
+         cbilinear bop /\ FINITE s
+         ==> bop (msum s f) y = msum s (\i. bop (f i) y)
+val CBILINEAR_RSUM : thm =
+  |- !bop f s x.
+         cbilinear bop /\ FINITE s
+         ==> bop x (msum s f) = msum s (\i. bop x (f i))
+val cadjoint : thm =
+  |- !f. cadjoint f = (@f'. !x y. f x cdot y = x cdot f' y)
+val CADJOINT_WORKS : thm =
+  |- !f. clinear f ==> (!x y. f x cdot y = x cdot cadjoint f y)
+val CVECTOR_EQ_LCDOT : thm = |- !y z. (!x. x cdot y = x cdot z) <=> y = z
+0..0..1..2..6..12..24..40..64..93..144..200..303..421..601..809..solved at 1017
+val CVECTOR_EQ_RCDOT : thm = |- !x y. (!z. x cdot z = y cdot z) <=> x = y
+val CADJOINT_CLINEAR : thm = |- !f. clinear f ==> clinear (cadjoint f)
+0..0..1..2..5..solved at 11
+0..0..1..2..5..9..15..22..29..36..73..115..187..274..solved at 317
+val CADJOINT_CLAUSES : thm =
+  |- !f. clinear f
+         ==> (!x y. x cdot cadjoint f y = f x cdot y) /\
+             (!x y. cadjoint f y cdot x = y cdot f x)
+val CADJOINT_CADJOINT : thm = |- !f. clinear f ==> cadjoint (cadjoint f) = f
+val CADJOINT_UNIQUE : thm =
+  |- !f f'. clinear f /\ (!x y. f' x cdot y = x cdot f y) ==> f' = cadjoint f
+val CADJOINT_COMPOSE : thm =
+  |- !f g.
+         clinear f /\ clinear g
+         ==> cadjoint (f o g) = cadjoint g o cadjoint f
+0..0..1..2..solved at 6
+0..0..1..2..solved at 6
+val SELF_CADJOINT_COMPOSE : thm =
+  |- !f g.
+         clinear f /\ clinear g /\ cadjoint f = f /\ cadjoint g = g
+         ==> (cadjoint (f o g) = f o g <=> f o g = g o f)
+val SELF_CADJOINT_ORTHOGONAL_EIGENCVECTORS : thm =
+  |- !f v w a b.
+         clinear f /\
+         cadjoint f = f /\
+         f v = a % v /\
+         f w = b % w /\
+         ~(a = cnj b)
+         ==> corthogonal v w
+val CORTHOGONAL_PROJECTION_ALT : thm =
+  |- !f. clinear f
+         ==> ((!x y. corthogonal (f x - x) (f x - f y)) <=>
+              (!x y. corthogonal (f x - x) (f y)))
+1 basis elements and 0 critical pairs
+2 basis elements and 0 critical pairs
+3 basis elements and 0 critical pairs
+val CORTHOGONAL_PROJECTION_EQ_SELF_CADJOINT_IDEMPOTENT : thm =
+  |- !f. clinear f
+         ==> ((!x y. corthogonal (f x - x) (f x - f y)) <=>
+              cadjoint f = f /\ f o f = f)
+0..0..1..2..9..17..33..51..79..110..solved at 118
+0..0..1..2..8..15..30..47..74..104..159..218..310..solved at 331
+0..0..1..2..9..17..33..54..86..121..184..251..352..solved at 389
+val CBILINEAR_EQ : thm =
+  |- !f g b c s.
+         cbilinear f /\
+         cbilinear g /\
+         s SUBSET cspan b /\
+         t SUBSET cspan c /\
+         (!x y. x IN b /\ y IN c ==> f x y = g x y)
+         ==> (!x y. x IN s /\ y IN t ==> f x y = g x y)
+0..0..1..2..7..13..solved at 32
+val CBILINEAR_EQ_STDCBASIS : thm =
+  |- !f g.
+         cbilinear f /\
+         cbilinear g /\
+         (!i j.
+              1 <= i /\ i <= dimindex (:M) /\ 1 <= j /\ j <= dimindex (:N)
+              ==> f (cbasis i) (cbasis j) = g (cbasis i) (cbasis j))
+         ==> f = g
+- : unit = ()
+- : unit = ()
+File "finvec/matrices.hl" already loaded
+- : unit = ()
+val BITS_ELIM_CONV : conv = <fun>
+val NUM_EQ_BINARY : thm =
+  |- (!n. 2 * n = 0 <=> n = 0) /\
+     (!n. ~(n + 1 = 0)) /\
+     (!n. 0 = 2 * n <=> 0 = n) /\
+     (!n. ~(0 = n + 1)) /\
+     (!m n. 2 * m = 2 * n <=> m = n) /\
+     (!m n. ~(2 * m = 2 * n + 1)) /\
+     (!m n. ~(2 * m + 1 = 2 * n)) /\
+     (!m n. 2 * m + 1 = 2 * n + 1 <=> m = n)
+val NUM_LE_BINARY : thm =
+  |- (!n. 0 <= n) /\
+     (!n. 2 * n <= 0 <=> n <= 0) /\
+     (!n. ~(n + 1 <= 0)) /\
+     (!m n. 2 * m <= 2 * n <=> m <= n) /\
+     (!m n. 2 * m <= 2 * n + 1 <=> m <= n) /\
+     (!m n. 2 * m + 1 <= 2 * n <=> m < n) /\
+     (!m n. 2 * m + 1 <= 2 * n + 1 <=> m <= n)
+val NUM_LT_BINARY : thm =
+  |- (!n. ~(n < 0)) /\
+     (!n. 0 < 2 * n <=> 0 < n) /\
+     (!n. 0 < n + 1) /\
+     (!m n. 2 * m < 2 * n <=> m < n) /\
+     (!m n. 2 * m < 2 * n + 1 <=> m <= n) /\
+     (!m n. 2 * m + 1 < 2 * n <=> m < n) /\
+     (!m n. 2 * m + 1 < 2 * n + 1 <=> m < n)
+val NUM_DIV2_BINARY : thm =
+  |- 0 DIV 2 = 0 /\ (!i. (2 * i) DIV 2 = i) /\ (!i. (2 * i + 1) DIV 2 = i)
+val NUM_MOD2_BINARY : thm =
+  |- 0 MOD 2 = 0 /\ (!i. (2 * i) MOD 2 = 0) /\ (!i. (2 * i + 1) MOD 2 = 1)
+val NUM_EVEN_BINARY : thm =
+  |- EVEN 0 /\ (!n. EVEN (2 * n)) /\ (!n. ~EVEN (2 * n + 1))
+val NUM_ODD_BINARY : thm =
+  |- ~ODD 0 /\ (!n. ~ODD (2 * n)) /\ (!n. ODD (2 * n + 1))
+val FORALL_BINARY_THM : thm =
+  |- !P. P 0 /\
+         (!n. 1 <= n /\ P n ==> P (2 * n)) /\
+         (!n. P n ==> P (2 * n + 1))
+         ==> (!n. P n)
+0..0..solved at 2
+val NUM_CASES_BINARY : thm =
+  |- !n. n = 0 \/ (?m. n = 2 * m) \/ (?m. n = 2 * m + 1)
+val FORALL_LT_BINARY : thm =
+  |- (!i. i < 0 ==> P i) /\
+     ((!i. i < 1 ==> P i) <=> P 0) /\
+     ((!i. i < 2 * n ==> P i) <=>
+      (!i. i < n ==> P (2 * i)) /\ (!i. i < n ==> P (2 * i + 1))) /\
+     ((!i. i < 2 * n + 1 ==> P i) <=>
+      (!i. i <= n ==> P (2 * i)) /\ (!i. i < n ==> P (2 * i + 1)))
+val FORALL_LE_BINARY : thm =
+  |- ((!i. i <= 0 ==> P i) <=> P 0) /\
+     ((!i. i <= 2 * n ==> P i) <=>
+      (!i. i <= n ==> P (2 * i)) /\ (!i. i < n ==> P (2 * i + 1))) /\
+     ((!i. i <= 2 * n + 1 ==> P i) <=>
+      (!i. i <= n ==> P (2 * i)) /\ (!i. i <= n ==> P (2 * i + 1)))
+val NUMSEG_LT_BINARY : thm =
+  |- {i | i < 0} = {} /\
+     {i | i < 1} = {0} /\
+     {i | i < n + 1} = n INSERT {i | i < n} /\
+     {i | i < 2 * n} =
+     IMAGE (\i. 2 * i) {i | i < n} UNION IMAGE (\i. 2 * i + 1) {i | i < n}
+val ITERATE_NUMSEG_LT : thm =
+  |- !op. monoidal op
+          ==> (!f. iterate op {i | i < 0} f = neutral op) /\
+              (!f. iterate op {i | i < 1} f = f 0) /\
+              (!n f.
+                   iterate op {i | i < n + 1} f =
+                   op (f n) (iterate op {i | i < n} f)) /\
+              (!n f.
+                   iterate op {i | i < 2 * n} f =
+                   op (iterate op {i | i < n} (\i. f (2 * i)))
+                   (iterate op {i | i < n} (\i. f (2 * i + 1))))
+val SUM_NUMSEG_LT : thm =
+  |- (!f. sum {i | i < 0} f = &0) /\
+     (!f. sum {i | i < 1} f = f 0) /\
+     (!n f. sum {i | i < n + 1} f = f n + sum {i | i < n} f) /\
+     (!n f.
+          sum {i | i < 2 * n} f =
+          sum {i | i < n} (\i. f (2 * i)) +
+          sum {i | i < n} (\i. f (2 * i + 1)))
+val VSUM_NUMSEG_LT : thm =
+  |- (!f. vsum {i | i < 0} f = vec 0) /\
+     (!f. vsum {i | i < 1} f = f 0) /\
+     (!n f. vsum {i | i < n + 1} f = f n + vsum {i | i < n} f) /\
+     (!n f.
+          vsum {i | i < 2 * n} f =
+          vsum {i | i < n} (\i. f (2 * i)) +
+          vsum {i | i < n} (\i. f (2 * i + 1)))
+- : unit = ()
+val DIMINDEX_GT_0 : thm = |- !s. 0 < dimindex s
+val VECTOR_1_GEN : thm = |- !v i. v$i = v$1
+val MATRIX_MUL_COMPONENT_ALT : thm =
+  |- !A B i j.
+         1 <= i /\ i <= dimindex (:M) /\ 1 <= j /\ j <= dimindex (:P)
+         ==> (A ** B)$i$j = sum (1..dimindex (:N)) (\k. A$i$k * B$k$j)
+val VECTOR_MATRIX_MUL_COMPONENT : thm =
+  |- !u A i. 1 <= i /\ i <= dimindex (:M) ==> (u ** A)$i = u dot column i A
+- : unit = ()
+- : unit = ()
+val component0 : thm = |- !v i. v $. i = v$(i + 1)
+val lambda0 : thm = |- !g. (lambda0) g = (lambda i. g (i - 1))
+val LAMBDA0_BETA : thm = |- !i. i < dimindex (:B) ==> (lambda0) g $. i = g i
+val FINITE_COMPONENT0_INRANGE : thm =
+  |- !i. ?k. k < dimindex (:N) /\ (!x. x $. i = x $. k)
+val CART_EQ0 : thm =
+  |- !x y. x = y <=> (!i. i < dimindex (:N) ==> x $. i = y $. i)
+val CART_EQ0_FULL : thm = |- !x y. x = y <=> (!i. x $. i = y $. i)
+val LAMBDA_EQ_LAMBDA0 : thm = |- !f. (lambda) f = (lambda0 i. f (i + 1))
+val INDEX_EQ_COMPONENT0 : thm = |- !x i. 1 <= i ==> x$i = x $. (i - 1)
+val VECTOR0_1_GEN : thm = |- !v i. v $. i = v $. 0
+val VECTOR_ADD_COMPONENT0 : thm = |- !x y i. (x + y) $. i = x $. i + y $. i
+val VECTOR_SUB_COMPONENT0 : thm = |- !x y i. (x - y) $. i = x $. i - y $. i
+val VECTOR_NEG_COMPONENT0 : thm = |- !x i. --x $. i = --(x $. i)
+val VECTOR_MUL_COMPONENT0 : thm = |- !c x i. (c % x) $. i = c * x $. i
+val DOT0 : thm =
+  |- !x y. x dot y = sum {i | i < dimindex (:N)} (\i. x $. i * y $. i)
+val COLUMN_COMPONENT : thm =
+  |- !A i j. 1 <= i /\ i <= dimindex (:N) ==> column j A$i = A$i$j
+val COLUMN_COMPONENT0 : thm =
+  |- !A i j. i < dimindex (:N) ==> column (j + 1) A $. i = A $. i $. j
+val MATRIX_ADD_COMPONENT0 : thm =
+  |- !A B i j. (A + B) $. i $. j = A $. i $. j + B $. i $. j
+val MATRIX_SUB_COMPONENT0 : thm =
+  |- !A B i j. (A - B) $. i $. j = A $. i $. j - B $. i $. j
+val MATRIX_NEG_COMPONENT0 : thm = |- !A i j. --A $. i $. j = --(A $. i $. j)
+val MATRIX_CMUL_COMPONENT0 : thm =
+  |- !c A i j. (c %% A) $. i $. j = c * A $. i $. j
+val MATRIX_VECTOR_MUL_COMPONENT0 : thm =
+  |- !A x k. k < dimindex (:M) ==> (A ** x) $. k = A $. k dot x
+val VECTOR_MATRIX_MUL_COMPONENT0 : thm =
+  |- !u A i. i < dimindex (:M) ==> (u ** A) $. i = u dot column (i + 1) A
+val MATRIX_MUL_COMPONENT0 : thm =
+  |- !A B i j.
+         i < dimindex (:M) /\ j < dimindex (:P)
+         ==> (A ** B) $. i $. j =
+             sum {i | i < dimindex (:N)} (\k. A $. i $. k * B $. k $. j)
+- : unit = ()
+val UNIV_HAS_SIZE_DIMINDEX : thm =
+  |- FINITE (:N) ==> (:N) HAS_SIZE dimindex (:N)
+val tybit0_INDUCT : thm = |- !P. (!a. P (mktybit0 a)) ==> (!x. P x)
+val tybit0_RECUR : thm = |- !f. ?fn. !a. fn (mktybit0 a) = f a
+val tybit1_INDUCT : thm = |- !P. (!a. P (mktybit1 a)) ==> (!x. P x)
+val tybit1_RECUR : thm = |- !f. ?fn. !a. fn (mktybit1 a) = f a
+val HAS_SIZE_TYBIT0 : thm = |- (:(A)tybit0) HAS_SIZE 2 * dimindex (:A)
+0..0..1..2..3..7..13..solved at 24
+val HAS_SIZE_TYBIT1 : thm = |- (:(A)tybit1) HAS_SIZE 2 * dimindex (:A) + 1
+val DIMINDEX_TYBIT0 : thm = |- dimindex (:(A)tybit0) = 2 * dimindex (:A)
+val DIMINDEX_TYBIT1 : thm = |- dimindex (:(A)tybit1) = 2 * dimindex (:A) + 1
+val DIMINDEX_CLAUSES : thm =
+  |- dimindex (:1) = 1 /\
+     dimindex (:(A)tybit0) = 2 * dimindex (:A) /\
+     dimindex (:(A)tybit1) = 2 * dimindex (:A) + 1
+0..0..1..solved at 4
+val FINITE_1 : thm = |- FINITE (:1)
+0..0..1..solved at 4
+val FINITE_TYBIT0 : thm = |- FINITE (:(A)tybit0)
+0..0..1..solved at 4
+val FINITE_TYBIT1 : thm = |- FINITE (:(A)tybit1)
+File "/home/maggesi/Devel/HOL/holy/finvec/fintypes.hl", line 86, characters 6-33:
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+[]
+File "/home/maggesi/Devel/HOL/holy/finvec/fintypes.hl", line 110, characters 10-20:
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+(_, [])
+val DIMINDEX_CONV : conv = <fun>
+val DIMINDEX_TAC : tactic = <fun>
+val mk_finty : num -> hol_type = <fun>
+val mk_prefinty : num -> pretype = <fun>
+val dest_finty : hol_type -> num = <fun>
+val use_finite_types : bool ref = {contents = true}
+val parse_pretype : lexcode list -> pretype * lexcode list = <fun>
+val pp_print_type : formatter -> hol_type -> unit = <fun>
+val pp_print_qtype : formatter -> hol_type -> unit = <fun>
+File "/home/maggesi/Devel/HOL/holy/finvec/fintypes.hl", line 238, characters 15-60:
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+(Varp (_, _)|Constp (_, _)|Absp (_, _)|Typing (_, _))
+File "/home/maggesi/Devel/HOL/holy/finvec/fintypes.hl", line 294, characters 10-65:
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+Resword _
+val parse_preterm : lexcode list -> preterm * lexcode list = <fun>
+val parse_type : string -> hol_type = <fun>
+val parse_term : string -> term = <fun>
+File "/home/maggesi/Devel/HOL/holy/finvec/fintypes.hl", line 736, characters 4-194:
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+[]
+File "/home/maggesi/Devel/HOL/holy/finvec/fintypes.hl", line 743, characters 4-313:
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+[]
+val pp_print_term : formatter -> term -> unit = <fun>
+val pp_print_qterm : formatter -> term -> unit = <fun>
+val pp_print_thm : formatter -> thm -> unit = <fun>
+val print_type : hol_type -> unit = <fun>
+val print_qtype : hol_type -> unit = <fun>
+val print_term : term -> unit = <fun>
+val print_qterm : term -> unit = <fun>
+val print_thm : thm -> unit = <fun>
+val print_to_string : (formatter -> 'a -> unit) -> 'a -> string = <fun>
+val string_of_type : hol_type -> string = <fun>
+val string_of_term : term -> string = <fun>
+val string_of_thm : thm -> string = <fun>
+val print_goal : goal -> unit = <fun>
+val print_goalstack : goalstack -> unit = <fun>
+val DIMINDEX_2 : thm = |- dimindex (:2) = 2
+val DIMINDEX_3 : thm = |- dimindex (:3) = 3
+val DIMINDEX_4 : thm = |- dimindex (:4) = 4
+val HAS_SIZE_2 : thm = |- (:2) HAS_SIZE 2
+val HAS_SIZE_3 : thm = |- (:3) HAS_SIZE 3
+val HAS_SIZE_4 : thm = |- (:4) HAS_SIZE 4
+val VECTOR_2 : thm = |- vector [x; y]$1 = x /\ vector [x; y]$2 = y
+val VECTOR_3 : thm =
+  |- vector [x; y; z]$1 = x /\
+     vector [x; y; z]$2 = y /\
+     vector [x; y; z]$3 = z
+val VECTOR_4 : thm =
+  |- vector [w; x; y; z]$1 = w /\
+     vector [w; x; y; z]$2 = x /\
+     vector [w; x; y; z]$3 = y /\
+     vector [w; x; y; z]$4 = z
+- : unit = ()
+val VECX_DEF : thm = |- !a. vecx a = (lambda0 i. a)
+val VEC0_DEF : thm =
+  |- !x y. vec0 x y = (lambda0 i. (if EVEN i then x else y) $. (i DIV 2))
+val VEC1_DEF : thm =
+  |- !a x y.
+         vec1 x y a =
+         (lambda0 i. if i = 2 * dimindex (:N)
+                     then a
+                     else (if EVEN i then x else y) $. (i DIV 2))
+val VECX_COMPONENT0 : thm = |- !a i. vecx a $. i = a
+val VEC0_COMPONENT0 : thm =
+  |- !x y i.
+         i < 2 * dimindex (:N)
+         ==> vec0 x y $. i = (if EVEN i then x else y) $. (i DIV 2)
+val VEC1_COMPONENT0 : thm =
+  |- !x y a i.
+         i < 2 * dimindex (:N) + 1
+         ==> vec1 x y a $. i =
+             (if i = 2 * dimindex (:N)
+              then a
+              else (if EVEN i then x else y) $. (i DIV 2))
+val VEC0_COMPONENT0_BINARY : thm =
+  |- (!x y. vec0 x y $. 0 = x $. 0) /\
+     (!x y i. i < dimindex (:N) ==> vec0 x y $. (2 * i) = x $. i) /\
+     (!x y i. i < dimindex (:N) ==> vec0 x y $. (2 * i + 1) = y $. i)
+val VEC1_COMPONENT0_BINARY : thm =
+  |- (!x y a. vec1 x y a $. 0 = x $. 0) /\
+     (!x y a i.
+          i <= dimindex (:N)
+          ==> vec1 x y a $. (2 * i) =
+              (if i = dimindex (:N) then a else x $. i)) /\
+     (!x y a i. i < dimindex (:N) ==> vec1 x y a $. (2 * i + 1) = y $. i)
+0..0..1..4..12..28..solved at 46
+0..0..1..solved at 4
+0..0..1..3..solved at 7
+0..0..solved at 2
+0..0..2..6..18..solved at 23
+0..0..1..solved at 4
+val VECTOR_EQ_ARITH : thm =
+  |- (!a b. vecx a = vecx b <=> a = b) /\
+     (!x x' y y'. vec0 x y = vec0 x' y' <=> x = x' /\ y = y') /\
+     (!x x' y y' c1 c2.
+          vec1 x y c1 = vec1 x' y' c2 <=> x = x' /\ y = y' /\ c1 = c2)
+val VECTOR_ADD_ARITH : thm =
+  |- (!x y. vecx x + vecx y = vecx (x + y)) /\
+     (!x x' y y'. vec0 x y + vec0 x' y' = vec0 (x + x') (y + y')) /\
+     (!x x' y y' a a'.
+          vec1 x y a + vec1 x' y' a' = vec1 (x + x') (y + y') (a + a'))
+val VECTOR_SUB_ARITH : thm =
+  |- (!x y. vecx x - vecx y = vecx (x - y)) /\
+     (!x x' y y'. vec0 x y - vec0 x' y' = vec0 (x - x') (y - y')) /\
+     (!x x' y y' a a'.
+          vec1 x y a - vec1 x' y' a' = vec1 (x - x') (y - y') (a - a'))
+val VECTOR_NEG_ARITH : thm =
+  |- (!x. --vecx x = vecx (--x)) /\
+     (!x y. --vec0 x y = vec0 (--x) (--y)) /\
+     (!x y a. --vec1 x y a = vec1 (--x) (--y) (--a))
+val VECTOR_CMUL_ARITH : thm =
+  |- (!c x. c % vecx x = vecx (c * x)) /\
+     (!c x y. c % vec0 x y = vec0 (c % x) (c % y)) /\
+     (!c x y a. c % vec1 x y a = vec1 (c % x) (c % y) (c * a))
+val DOT_ARITH : thm =
+  |- (!a b. vecx a dot vecx b = a * b) /\
+     (!x x' y y'. vec0 x y dot vec0 x' y' = x dot x' + y dot y') /\
+     (!x x' y y' a b.
+          vec1 x y a dot vec1 x' y' b = x dot x' + y dot y' + a * b)
+val NORM_POW_2_ARITH : thm =
+  |- (!x. norm (vecx x) pow 2 = x pow 2) /\
+     (!x y. norm (vec0 x y) pow 2 = norm x pow 2 + norm y pow 2) /\
+     (!x y a.
+          norm (vec1 x y a) pow 2 = norm x pow 2 + norm y pow 2 + a pow 2)
+val COLUMN_ARITH : thm =
+  |- (!u j. column j (vecx u) = vecx (u$j)) /\
+     (!A B j. column j (vec0 A B) = vec0 (column j A) (column j B)) /\
+     (!A B u j. column j (vec1 A B u) = vec1 (column j A) (column j B) (u$j))
+val MATRIX_ADD_ARITH : thm =
+  |- (!u v. vecx u + vecx v = vecx (u + v)) /\
+     (!A A' B B'. vec0 A B + vec0 A' B' = vec0 (A + A') (B + B')) /\
+     (!A A' B B' u u'.
+          vec1 A B u + vec1 A' B' u' = vec1 (A + A') (B + B') (u + u'))
+val MATRIX_SUB_ARITH : thm =
+  |- (!u v. vecx u - vecx v = vecx (u - v)) /\
+     (!A A' B B'. vec0 A B - vec0 A' B' = vec0 (A - A') (B - B')) /\
+     (!A A' B B' u u'.
+          vec1 A B u - vec1 A' B' u' = vec1 (A - A') (B - B') (u - u'))
+val MATRIX_NEG_ARITH : thm =
+  |- (!u. --vecx u = vecx (--u)) /\
+     (!A B. --vec0 A B = vec0 (--A) (--B)) /\
+     (!A B u. --vec1 A B u = vec1 (--A) (--B) (--u))
+val MATRIX_CMUL_ARITH : thm =
+  |- (!c u. c %% vecx u = vecx (c % u)) /\
+     (!c A B. c %% vec0 A B = vec0 (c %% A) (c %% B)) /\
+     (!c A B u. c %% vec1 A B u = vec1 (c %% A) (c %% B) (c % u))
+val MATRIX_MUL_ARITH : thm =
+  |- (!u A. vecx u ** A = vecx (u ** A)) /\
+     (!A B C. vec0 A B ** C = vec0 (A ** C) (B ** C)) /\
+     (!A B u C. vec1 A B u ** C = vec1 (A ** C) (B ** C) (u ** C))
+val MATRIX_VECTOR_MUL_ARITH : thm =
+  |- (!u x. vecx u ** x = vecx (u dot x)) /\
+     (!A B x. vec0 A B ** x = vec0 (A ** x) (B ** x)) /\
+     (!A B u x. vec1 A B u ** x = vec1 (A ** x) (B ** x) (u dot x))
+val VECTOR_MATRIX_MUL_ARITH : thm =
+  |- (!a u. vecx a ** vecx u = a % u) /\
+     (!u v A B. vec0 u v ** vec0 A B = u ** A + v ** B) /\
+     (!u v a A B w. vec1 u v a ** vec1 A B w = u ** A + v ** B + a % w)
+val VECTOR_CASES_THM : thm =
+  |- (!v. ?x. v = vecx x) /\
+     (!v. ?x y. v = vec0 x y) /\
+     (!v. ?x y a. v = vec1 x y a)
+0..0..solved at 2
+0..0..1..2..5..9..solved at 16
+0..0..solved at 2
+0..0..1..2..5..9..solved at 16
+0..0..solved at 2
+0..0..1..2..5..9..solved at 16
+val FORALL_VECTOR_THM : thm =
+  |- (!P. (!x. P x) <=> (!a. P (vecx a))) /\
+     (!P. (!x. P x) <=> (!y z. P (vec0 y z))) /\
+     (!P. (!x. P x) <=> (!y z c. P (vec1 y z c)))
+0..0..1..2..solved at 6
+0..0..solved at 2
+0..0..1..2..solved at 6
+0..0..solved at 2
+0..0..1..2..solved at 6
+0..0..solved at 2
+val EXISTS_VECTOR_THM : thm =
+  |- (!P. (?x. P x) <=> (?a. P (vecx a))) /\
+     (!P. (?x. P x) <=> (?y z. P (vec0 y z))) /\
+     (!P. (?x. P x) <=> (?y z c. P (vec1 y z c)))
+val LAMBDA0_BINARY : thm =
+  |- (!f. (lambda0) f = vecx (f 0)) /\
+     (!f. (lambda0) f =
+          vec0 (lambda0 j. f (2 * j)) (lambda0 j. f (2 * j + 1))) /\
+     (!f. (lambda0) f =
+          vec1 (lambda0 j. f (2 * j)) (lambda0 j. f (2 * j + 1))
+          (f (2 * dimindex (:N))))
+val LAMBDA0_ARITH : thm =
+  |- (!f. (lambda0) f = (lambda0 i. f (NUMERAL i))) /\
+     (!f. (lambda0) f = vecx (f _0)) /\
+     (!f. (lambda0) f = vec0 (lambda0 j. f (BIT0 j)) (lambda0 j. f (BIT1 j))) /\
+     (!f. (lambda0) f =
+          vec1 (lambda0 j. f (BIT0 j)) (lambda0 j. f (BIT1 j))
+          (f (BIT0 (dimindex (:N)))))
+val get_vector_component : int -> int -> term -> term = <fun>
+val dest_vector : term -> term list = <fun>
+val mk_vector : term list -> term = <fun>
+val pmk_vector : preterm list -> preterm = <fun>
+val parse_finvec : lexcode list -> preterm * lexcode list = <fun>
+- : unit = ()
+val pp_print_term_sequence : formatter -> bool -> string -> term list -> unit =
+  <fun>
+val pp_finvec_printer : formatter -> term -> unit = <fun>
+- : unit = ()
+- : unit = ()
+val has_vector_component0 : thm =
+  |- !v i x.
+         (v has_vector_component0 x) i <=> i < dimindex (:N) /\ v $. i = x
+0..0..1..solved at 4
+0..0..solved at 2
+0..0..1..solved at 4
+0..0..solved at 2
+0..0..2..8..solved at 13
+0..0..solved at 2
+0..0..solved at 2
+0..0..1..6..solved at 10
+0..0..2..solved at 5
+val HAS_VECTOR_COMPONENT0_BINARY : thm =
+  |- (!a b i. (Vx[a] has_vector_component0 b) i <=> i = 0 /\ a = b) /\
+     (!x y b.
+          (vec0 x y has_vector_component0 b) 0 <=>
+          (x has_vector_component0 b) 0) /\
+     (!x y b i.
+          (vec0 x y has_vector_component0 b) (2 * i) <=>
+          (x has_vector_component0 b) i) /\
+     (!x y b i.
+          (vec0 x y has_vector_component0 b) (2 * i + 1) <=>
+          (y has_vector_component0 b) i) /\
+     (!x y a b.
+          (vec1 x y a has_vector_component0 b) 0 <=>
+          (x has_vector_component0 b) 0) /\
+     (!x y a b i.
+          (vec1 x y a has_vector_component0 b) (2 * i) <=>
+          (if i = dimindex (:N) then a = b else (x has_vector_component0 b) i)) /\
+     (!x y a b i.
+          (vec1 x y a has_vector_component0 b) (2 * i + 1) <=>
+          (y has_vector_component0 b) i)
+val HAS_VECTOR_COMPONENT0_ARITH : thm =
+  |- (!v b i.
+          (v has_vector_component0 b) (NUMERAL i) <=>
+          (v has_vector_component0 b) i) /\
+     (!a b i. (Vx[a] has_vector_component0 b) i <=> i = _0 /\ a = b) /\
+     (!x y b.
+          (vec0 x y has_vector_component0 b) _0 <=>
+          (x has_vector_component0 b) _0) /\
+     (!x y b i.
+          (vec0 x y has_vector_component0 b) (BIT0 i) <=>
+          (x has_vector_component0 b) i) /\
+     (!x y b i.
+          (vec0 x y has_vector_component0 b) (BIT1 i) <=>
+          (y has_vector_component0 b) i) /\
+     (!x y a b.
+          (vec1 x y a has_vector_component0 b) _0 <=>
+          (x has_vector_component0 b) _0) /\
+     (!x y a b i.
+          (vec1 x y a has_vector_component0 b) (BIT0 i) <=>
+          (if i = dimindex (:N) then a = b else (x has_vector_component0 b) i)) /\
+     (!x y a b i.
+          (vec1 x y a has_vector_component0 b) (BIT1 i) <=>
+          (y has_vector_component0 b) i)
+0..0..solved at 2
+val VECTOR_COMPONENT0_CONV : conv = <fun>
+0..0..solved at 2
+val VECTOR_COMPONENT_CONV : conv = <fun>
+val VECTOR_RED_CONV : conv = <fun>
+val VECTOR_REDUCE_CONV : conv = <fun>
+val VECTOR_REDUCE_TAC : tactic = <fun>
+- : unit = ()
+- : unit = ()
+File "cvectors/make.hl" already loaded
+- : unit = ()
+val MATRIX_ADD_ROW0 : thm = |- !X Y i. (X + Y) $. i = X $. i + Y $. i
+val MATRIX_SUB_ROW0 : thm = |- !X Y i. (X - Y) $. i = X $. i - Y $. i
+val MATRIX_NEG_ROW0 : thm = |- !X i. --X $. i = --(X $. i)
+val MATRIX_CMUL_ROW0 : thm = |- !c X i. (c %% X) $. i = c % X $. i
+val MAT_0_ROW0 : thm = |- mat 0 $. i = vec 0
+val CVECTOR_MUL_COMPONENT0 : thm = |- !c x i. (c % x) $. i = c * x $. i
+val CDOT0 : thm =
+  |- !x y.
+         x cdot y = vsum {i | i < dimindex (:N)} (\i. x $. i * cnj (y $. i))
+val COMPLEX_VECTOR_ADD_ARITH : thm =
+  |- (!x y. Vx[x] + Vx[y] = Vx[x + y]) /\
+     (!x x' y y'. vec0 x y + vec0 x' y' = vec0 (x + x') (y + y')) /\
+     (!x x' y y' a a'.
+          vec1 x y a + vec1 x' y' a' = vec1 (x + x') (y + y') (a + a'))
+val COMPLEX_VECTOR_SUB_ARITH : thm =
+  |- (!x y. Vx[x] - Vx[y] = Vx[x - y]) /\
+     (!x x' y y'. vec0 x y - vec0 x' y' = vec0 (x - x') (y - y')) /\
+     (!x x' y y' a a'.
+          vec1 x y a - vec1 x' y' a' = vec1 (x - x') (y - y') (a - a'))
+val COMPLEX_VECTOR_NEG_ARITH : thm =
+  |- (!a. --Vx[a] = Vx[--a]) /\
+     (!x y. --vec0 x y = vec0 (--x) (--y)) /\
+     (!x y a. --vec1 x y a = vec1 (--x) (--y) (--a))
+val COMPLEX_VECTOR_CMUL_ARITH : thm =
+  |- (!c a. c % Vx[a] = Vx[c * a]) /\
+     (!c x y. c % vec0 x y = vec0 (c % x) (c % y)) /\
+     (!c x y a. c % vec1 x y a = vec1 (c % x) (c % y) (c * a))
+val CDOT_ARITH : thm =
+  |- (!a b. Vx[a] cdot Vx[b] = a * cnj b) /\
+     (!x x' y y'. vec0 x y cdot vec0 x' y' = x cdot x' + y cdot y') /\
+     (!x x' y y' a b.
+          vec1 x y a cdot vec1 x' y' b = x cdot x' + y cdot y' + a * cnj b)
+- : unit = ()
+val BIT0_DOUBLE : thm = |- !n. BIT0 n = 2 * n
+val BIT1_DOUBLE : thm = |- !n. BIT1 n = 2 * n + 1
+val VEC1_DEF_OLD : thm =
+  |- !x y a.
+         vec1 x y a =
+         (lambda0 i. if i = BIT0 (dimindex (:N))
+                     then a
+                     else (if EVEN i then x else y) $. (i DIV 2))
+- : unit = ()
+val bool_add : thm = |- !b1 b2. b1 + b2 <=> b1 /\ ~b2 \/ ~b1 /\ b2
+- : unit = ()
+- : unit = ()
+val bvector_add : thm = |- !b1 b2. b1 + b2 = (lambda0 i. b1 $. i + b2 $. i)
+val bvector_neg : thm = |- !b. --b = (lambda0 i. ~(b $. i))
+val BVECTOR_ADD_COMPONENT : thm =
+  |- !b1 b2 i. i < dimindex (:N) ==> ((b1 + b2) $. i <=> b1 $. i + b2 $. i)
+val BVECTOR_NEG_COMPONENT : thm =
+  |- !b i. i < dimindex (:N) ==> (--b $. i <=> ~(b $. i))
+val BOOL_FINVEC_ADD_COMPONENT : thm =
+  |- (!x y. Vx[x] + Vx[y] = Vx[x + y]) /\
+     (!x y z t. vec0 x y + vec0 z t = vec0 (x + z) (y + t)) /\
+     (!x y z t a b. vec1 x y a + vec1 z t b = vec1 (x + z) (y + t) (a + b))
+val BOOL_FINVEC_NEG_COMPONENT : thm =
+  |- (!x. --Vx[x] = Vx[~x]) /\
+     (!x y. --vec0 x y = vec0 (--x) (--y)) /\
+     (!x y a. --vec1 x y a = vec1 (--x) (--y) (~a))
+- : unit = ()
+val it : unit = ()
+# No more Warnings/Errors/Exceptions/Failures.
+Exiting.
+
+val it : unit = ()
+# 

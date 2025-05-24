@@ -1,0 +1,22 @@
+#!/bin/sh
+
+logfile="output_extras.log"
+
+function go ()
+{
+   ./runhol_complex 2>&1 | tee $logfile
+}
+
+go <<EOF
+loadt "finvec/make_extras.hl";;
+report "No more Warnings/Errors/Exceptions/Failures.\nExiting.\n";;
+exit 0;;
+EOF
+
+echo "----------------------------------------------------------------------"
+echo " Warnings/Errors/Exceptions"
+echo "----------------------------------------------------------------------"
+
+grep -v "^Warning 8: this pattern-matching is not exhaustive.$" $logfile |
+  grep --color "\\(^CPU time \\)\\|\\b\\(Warning\\|Error\\|Exception\\|Failure\\)s\\?\\b"
+echo "All done."

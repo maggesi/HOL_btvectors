@@ -1,0 +1,96 @@
+let DIMINDEX_TYBIT_BOUND = prove
+ (`(!i. 2 * i     <= dimindex(:(N)tybit0) <=> i <= dimindex(:N)) /\
+   (!i. 2 * i + 1 <= dimindex(:(N)tybit0) <=> i <  dimindex(:N)) /\
+   (!i. 2 * i     <= dimindex(:(N)tybit1) <=> i <= dimindex(:N)) /\
+   (!i. 2 * i + 1 <= dimindex(:(N)tybit1) <=> i <= dimindex(:N)) /\
+   (!i. 2 * i     < dimindex(:(N)tybit0) <=> i <  dimindex(:N)) /\
+   (!i. 2 * i + 1 < dimindex(:(N)tybit0) <=> i <  dimindex(:N)) /\
+   (!i. 2 * i     < dimindex(:(N)tybit1) <=> i <= dimindex(:N)) /\
+   (!i. 2 * i + 1 < dimindex(:(N)tybit1) <=> i <  dimindex(:N))`,
+  REWRITE_TAC[DIMINDEX_TYBIT0; DIMINDEX_TYBIT1] THEN ARITH_TAC);;
+
+let ARITH_DIMINDEX_TYBIT_BOUND = prove
+ (`(!i. BIT0 i <= dimindex(:(N)tybit0) <=> i <= dimindex(:N)) /\
+   (!i. BIT1 i <= dimindex(:(N)tybit0) <=> i <  dimindex(:N)) /\
+   (!i. BIT0 i <= dimindex(:(N)tybit1) <=> i <= dimindex(:N)) /\
+   (!i. BIT1 i <= dimindex(:(N)tybit1) <=> i <= dimindex(:N)) /\
+   (!i. BIT0 i < dimindex(:(N)tybit0) <=> i <  dimindex(:N)) /\
+   (!i. BIT1 i < dimindex(:(N)tybit0) <=> i <  dimindex(:N)) /\
+   (!i. BIT0 i < dimindex(:(N)tybit1) <=> i <= dimindex(:N)) /\
+   (!i. BIT1 i < dimindex(:(N)tybit1) <=> i <  dimindex(:N))`,
+  CONV_TAC BITS_ELIM_CONV THEN
+  REWRITE_TAC[DIMINDEX_TYBIT0; DIMINDEX_TYBIT1] THEN ARITH_TAC);;
+
+let VCONST = new_definition
+  `VCONST (a:A) : A^N = lambda i. a`;;
+
+let VCONST_COMPONENT = prove
+ (`!a i. VCONST a:A^N$i = a`,
+  REPEAT GEN_TAC THEN
+  SUBGOAL_THEN `?k. 1 <= k /\ k <= dimindex(:N) /\ (!x. x:A^N$i = x$k)`
+    CHOOSE_TAC THENL
+  [MATCH_ACCEPT_TAC FINITE_INDEX_INRANGE; ASM_SIMP_TAC[VCONST; LAMBDA_BETA]]);;
+
+let VCONST_COMPONENT0 = prove
+ (`!a i. VCONST a:A^N$.i = a`,
+  REWRITE_TAC[index0; VCONST_COMPONENT]);;
+
+let VAPPEND = new_definition
+  `VAPPEND (x:A^M) (y:A^N) : A^P =
+   lambda0 i. if EVEN i then x$.(i DIV 2) else y$.(i DIV 2)`;;
+
+let VAPPEND_COMPONENT0 = prove
+ (`!x:A^M y:A^N i.
+     i < dimindex(:P)
+     ==> VAPPEND x y:A^P$.i = if EVEN i then x$.(i DIV 2) else y$.(i DIV 2)`,
+  SIMP_TAC[VAPPEND; LAMBDA0_BETA]);;
+
+needs "finvec/misc.hl";;
+needs "finvec/fintypes.hl";;
+
+let VAPPEND_TYBIT = prove
+ (`(!x:A^M y:A^N. VAPPEND x y:A^P$.0 = x$.0) /\
+   (!x:A^N y:A^N i. i < dimindex(:N)
+                    ==> VAPPEND x y:A^(N)tybit0$.(2 * i) = x$.i) /\
+   (!x:A^N y:A^N i. i < dimindex(:N)
+                   ==> VAPPEND x y:A^(N)tybit0$.(2 * i + 1) = y$.i) /\
+   (!x:A^N y:A^N i. i <= dimindex(:N)
+                    ==> VAPPEND x y:A^(N)tybit1$.(2 * i) = x$.i) /\
+   (!x:A^N y:A^N i. i < dimindex(:N)
+                   ==> VAPPEND x y:A^(N)tybit1$.(2 * i + 1) = y$.i)`,
+  CONJ_TAC THENL
+  [SUBGOAL_THEN `0 < dimindex(:P)` ASSUME_TAC THENL
+   [MP_TAC (ISPEC `(:P)` DIMINDEX_GE_1) THEN ARITH_TAC;
+    ASM_SIMP_TAC[VAPPEND; LAMBDA0_BETA] THEN NUM_REDUCE_TAC];
+    ALL_TAC] THEN
+  SIMP_TAC[VAPPEND_COMPONENT0; DIMINDEX_TYBIT_BOUND] THEN
+  REWRITE_TAC[EVEN_ADD; EVEN_DOUBLE] THEN NUM_REDUCE_TAC THEN
+  REPEAT STRIP_TAC THEN AP_TERM_TAC THEN ARITH_TAC);;
+
+let VAPPEND_COMPONENT_ARITH = prove
+ (`(!x:A^M y:A^N. VAPPEND x y:A^P$. _0 = x$. _0) /\
+   (!x:A^N y:A^N i. i < dimindex(:N)
+                    ==> VAPPEND x y:A^(N)tybit0$.BIT0 i = x$.i) /\
+   (!x:A^N y:A^N i. i < dimindex(:N)
+                    ==> VAPPEND x y:A^(N)tybit0$.BIT1 i = y$.i) /\
+   (!x:A^N y:A^N i. i <= dimindex(:N)
+                    ==> VAPPEND x y:A^(N)tybit1$.BIT0 i = x$.i) /\
+   (!x:A^N y:A^N i. i < dimindex(:N)
+                    ==> VAPPEND x y:A^(N)tybit1$.BIT1 i = y$.i)`,
+  CONV_TAC BITS_ELIM_CONV THEN
+  CONJ_TAC THENL
+  [SUBGOAL_THEN `0 < dimindex(:P)` ASSUME_TAC THENL
+   [MP_TAC (ISPEC `(:P)` DIMINDEX_GE_1) THEN ARITH_TAC;
+    ASM_SIMP_TAC[VAPPEND; LAMBDA0_BETA] THEN NUM_REDUCE_TAC];
+    ALL_TAC] THEN
+  SIMP_TAC[VAPPEND_COMPONENT0; DIMINDEX_TYBIT_BOUND] THEN
+  REWRITE_TAC[EVEN_ADD; EVEN_DOUBLE] THEN NUM_REDUCE_TAC THEN
+  REPEAT STRIP_TAC THEN AP_TERM_TAC THEN ARITH_TAC);;
+
+let unzip_list =
+  let rec unzip b =
+    function
+      [] ->[],[]
+    | h::t -> let l0,l1 = unzip (not b) t in
+              if b then l0,h::l1 else h::l0,l1  in
+  unzip false;;

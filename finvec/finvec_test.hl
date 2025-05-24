@@ -1,0 +1,209 @@
+(* ========================================================================= *)
+(* Tests associated to file finvec.hl.                                       *)
+(*                                                                           *)
+(* (c) Copyright, Andrea Gabrielli, Marco Maggesi 2017-2018                  *)
+(* ========================================================================= *)
+
+(* ------------------------------------------------------------------------- *)
+(* Test VECTOR_COMPONENT0_CONV.                                              *)
+(* ------------------------------------------------------------------------- *)
+
+prove
+ (`vecx x $. 0 = x:W /\
+   vec0 (vecx x) (vecx y) $. 0 = x /\
+   vec0 (vecx x) (vecx y) $. 1 = y /\
+
+   vec1 (vecx x) (vecx y) z $. 0 = x /\
+   vec1 (vecx x) (vecx y) z $. 1 = y /\
+   vec1 (vecx x) (vecx y) z $. 2 = z /\
+
+   vec0 (vec0 (vecx a) (vecx b))
+        (vec0 (vecx x) (vecx y)) $. 0 = a /\
+   vec0 (vec0 (vecx a) (vecx b))
+        (vec0 (vecx x) (vecx y)) $. 1 = x /\
+   vec0 (vec0 (vecx a) (vecx b))
+        (vec0 (vecx x) (vecx y)) $. 2 = b /\
+   vec0 (vec0 (vecx a) (vecx b))
+        (vec0 (vecx x) (vecx y)) $. 3 = y /\
+
+   vec1 (vec0 (vecx a) (vecx b))
+        (vec0 (vecx x) (vecx y))
+        u $. 0 = a /\
+   vec1 (vec0 (vecx a) (vecx b))
+        (vec0 (vecx x) (vecx y))
+        u $. 1 = x /\
+   vec1 (vec0 (vecx a) (vecx b))
+        (vec0 (vecx x) (vecx y))
+        u $. 2 = b /\
+   vec1 (vec0 (vecx a) (vecx b))
+        (vec0 (vecx x) (vecx y))
+        u $. 3 = y /\
+   vec1 (vec0 (vecx a) (vecx b))
+        (vec0 (vecx x) (vecx y))
+        u $. 4 = u`,
+  CONV_TAC (ONCE_DEPTH_CONV VECTOR_COMPONENT0_CONV) THEN
+  REWRITE_TAC[]);;
+
+
+VECTOR_COMPONENT_CONV `Vx[a;b;c;d;e;f:X]$3`;;
+
+prove
+ (`vecx x $ 1 = x:W /\
+   vec0 (vecx x) (vecx y) $ 1 = x /\
+   vec0 (vecx x) (vecx y) $ 2 = y /\
+
+   vec1 (vecx x) (vecx y) z $ 1 = x /\
+   vec1 (vecx x) (vecx y) z $ 2 = y /\
+   vec1 (vecx x) (vecx y) z $ 3 = z /\
+
+   vec0 (vec0 (vecx a) (vecx b))
+        (vec0 (vecx x) (vecx y)) $ 1 = a /\
+   vec0 (vec0 (vecx a) (vecx b))
+        (vec0 (vecx x) (vecx y)) $ 2 = x /\
+   vec0 (vec0 (vecx a) (vecx b))
+        (vec0 (vecx x) (vecx y)) $ 3 = b /\
+   vec0 (vec0 (vecx a) (vecx b))
+        (vec0 (vecx x) (vecx y)) $ 4 = y /\
+
+   vec1 (vec0 (vecx a) (vecx b))
+        (vec0 (vecx x) (vecx y))
+        u $ 1 = a /\
+   vec1 (vec0 (vecx a) (vecx b))
+        (vec0 (vecx x) (vecx y))
+        u $ 2 = x /\
+   vec1 (vec0 (vecx a) (vecx b))
+        (vec0 (vecx x) (vecx y))
+        u $ 3 = b /\
+   vec1 (vec0 (vecx a) (vecx b))
+        (vec0 (vecx x) (vecx y))
+        u $ 4 = y /\
+   vec1 (vec0 (vecx a) (vecx b))
+        (vec0 (vecx x) (vecx y))
+        u $ 5 = u`,
+  CONV_TAC (ONCE_DEPTH_CONV VECTOR_COMPONENT_CONV) THEN
+  REWRITE_TAC[]);;
+
+(* ------------------------------------------------------------------------- *)
+(* Test dest_vector e mk_vector.                                             *)
+(* ------------------------------------------------------------------------- *)
+
+assert
+  (dest_vector
+     `vec0 (vec1 (vecx (x:X)) (vecx (y:X)) (z:X))
+           (vec1 (vecx (a:X)) (vecx (b:X)) (c:X))` =
+   [`x:X`; `a:X`; `y:X`; `b:X`; `z:X`; `c:X`]);;
+
+(*;;
+mk_vector [`1`];;
+mk_vector [`1`;`2`];;
+mk_vector [`1`;`2`;`3`];;
+mk_vector [`1`;`2`;`3`;`4`];;
+mk_vector [`1`;`2`;`3`;`4`;`5`];;
+*)
+
+do_list (fun tm -> assert(mk_vector(dest_vector tm) = tm))
+  [`vecx (x:X)`;
+   `vec1 (vecx (x:X)) (vecx (y:X)) (z:X)`;
+   `vec0 (vec1 (vecx (x:X)) (vecx (y:X)) (z:X))
+         (vec1 (vecx (a:X)) (vecx (b:X)) (c:X))`;
+   `vec1 (vec1 (vecx (x:X)) (vecx (y:X)) (z:X))
+         (vec1 (vecx (a:X)) (vecx (b:X)) (c:X)) (j:X)`];;
+
+do_list (fun l -> assert(dest_vector(mk_vector l) = l))
+  [[`0`];
+   [`0`; `1`];
+   [`0`; `1`; `2`];
+   [`0`; `1`; `2`; `3`];
+   [`0`; `1`; `2`; `3`; `4`];
+   [`0`; `1`; `2`; `3`; `4`; `5`];
+   [`0`; `1`; `2`; `3`; `4`; `5`; `6`]];;
+
+(* ------------------------------------------------------------------------- *)
+(* Test pmk_vector.                                                          *)
+(* ------------------------------------------------------------------------- *)
+
+let ptm1 = Varp("0",dpty)
+and ptm2 = Varp("1",dpty)
+and ptm3 = Varp("2",dpty)
+and ptm4 = Varp("3",dpty) in
+let ptm = pmk_vector [ptm1; ptm2; ptm3; ptm4] in
+let tm = term_of_preterm(retypecheck [] ptm) in
+assert (dest_vector tm = [`0`; `1`; `2`; `3`]);;
+
+(* ------------------------------------------------------------------------- *)
+(* Test parse_finvec.                                                        *)
+(* ------------------------------------------------------------------------- *)
+
+(dest_vector o term_of_preterm o retypecheck [] o
+ fst o parse_finvec o lex o explode)
+"Vx[0; 1; 2]" = [`0`; `1`; `2`];;
+
+(dest_vector o term_of_preterm o retypecheck [] o
+ fst o parse_finvec o lex o explode)
+"Vx[0; 1; 2; 3]" = [`0`; `1`; `2`; `3`];;
+
+(dest_vector o term_of_preterm o retypecheck [] o
+ fst o parse_finvec o lex o explode)
+"Vx[0; 1; 2; 3; 4]" = [`0`; `1`; `2`; `3`; `4`];;
+
+assert(dest_vector `Vx[0]` = [`0`]);
+assert(dest_vector `Vx[0; 1]` = [`0`; `1`]);
+assert(dest_vector `Vx[0; 1; 2]` = [`0`; `1`; `2`]);
+assert(dest_vector `Vx[0; 1; 2; 3]` = [`0`; `1`; `2`; `3`]);;
+
+(* ------------------------------------------------------------------------- *)
+(* Test pp_finvec_printer.                                                   *)
+(* ------------------------------------------------------------------------- *)
+
+(* Test
+;;
+delete_user_printer "finvec";;
+*)
+
+pp_print_newline std_formatter ();
+pp_finvec_printer std_formatter `Vx[0;1]`;
+pp_print_newline std_formatter ();
+pp_finvec_printer std_formatter
+   `Vx[0;3;9;12;0;3;3;1123;182883;9;12;0;3;
+      9;88;12;9;12;0;3;9;12;0;3;9;88;12;0;3;9;12]`;
+pp_print_newline std_formatter ();;
+
+(* ------------------------------------------------------------------------- *)
+(* Testing VECTOR_REDUCE_CONV.                                               *)
+(* ------------------------------------------------------------------------- *)
+
+VECTOR_REDUCE_CONV `Vx[a;b;c:A] $. 1`;;
+VECTOR_REDUCE_CONV `Vx[a;b;c;d:A] $ 3`;;
+
+VECTOR_RED_CONV `Vx[&1; &2 ; &3; &4; &5] = Vx[&3; -- &1; &1; &0; &4]`;;
+VECTOR_RED_CONV `Vx[&1; &2 ; &3; &4; &5] + Vx[&3; -- &1; &1; &0; &4]`;;
+VECTOR_RED_CONV `Vx[&1; &2 ; &3; &4; &5] - Vx[&3; -- &1; &1; &0; &4]`;;
+VECTOR_RED_CONV `-- Vx[&1; &2 ; &3; &4; &5]`;;
+VECTOR_RED_CONV `&3 % Vx[&1; &2 ; &3; &4; &5]`;;
+VECTOR_RED_CONV `Vx[&1; &2 ; &3; &4; &5] dot Vx[&3; -- &1; &1; &0; &4]`;;
+
+(TOP_SWEEP_CONV let_CONV THENC VECTOR_REDUCE_CONV THENC REAL_RAT_REDUCE_CONV)
+  `let u = Vx[&1; -- &2; &1; &0; &3] in
+   let v = Vx[&1; &2; &3; &4; &5] in
+   (u dot v) / (u dot u) % u`;;
+
+VECTOR_REDUCE_CONV
+  `Vx[Vx[&1; &2]; Vx[&3; &4]] **
+   Vx[Vx[-- &3; &2]; Vx[&2; &0]]`;;
+
+prove
+ (`Vx[Vx[&1; &2]; Vx[&3; &4]] ** Vx[Vx[-- &3; &2]; Vx[&2; &0]] =
+   Vx[Vx[&1; &2]; Vx[-- &1; &6]]`,
+  VECTOR_REDUCE_TAC);;
+
+(TOP_SWEEP_CONV let_CONV THENC VECTOR_REDUCE_CONV)
+`let A = Vx[Vx[&1; &2]; Vx[&3; &4]] in
+ let B = Vx[Vx[-- &3; &2]; Vx[&2; &0]] in
+ A ** B - B ** A`;;
+
+prove
+ (`let A = Vx[Vx[&1; &2]; Vx[&3; &4]] in
+   let B = Vx[Vx[-- &3; &2]; Vx[&2; &0]] in
+   A ** B - B ** A = Vx[Vx[-- &2; &0]; Vx[-- &3; &2]]`,
+  CONV_TAC (TOP_SWEEP_CONV let_CONV) THEN
+  VECTOR_REDUCE_TAC);;

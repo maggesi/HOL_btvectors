@@ -1,0 +1,13 @@
+(* ========================================================================= *)
+(* Ad hoc encoding for finite types ("fintypes") and for vectors indexed by  *)
+(* finite types ("finvectors").                                              *)
+(*                                                                           *)
+(* Load both real and complex finvectors.                                    *)
+(*                                                                           *)
+(* (c) Copyright, Andrea Gabrielli, Marco Maggesi 2017-2018                  *)
+(* ========================================================================= *)
+
+needs "cvectors/make.hl";;          (* Complex vectors                      *)
+needs "finvec/make.hl";;            (* Real finvectors                      *)
+loadt "finvec/finvec_complex.hl";;  (* Complex finvectors                   *)
+loadt "finvec/finvec_bool.hl";;     (* Some of these are needed in quantum  *)

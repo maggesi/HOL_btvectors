@@ -1,0 +1,288 @@
+(* ========================================================================= *)
+(* Iterate numseg.                                                           *)
+(* ========================================================================= *)
+
+let ARITH_LE_LEFT_CLAUSES = prove
+ (`(!n i. NUMERAL n <= i <=> n <= i) /\
+   (!i. _0 <= i <=> T) /\
+   (!n i. BIT0 n <= i <=>
+          (?j. i = BIT0 j /\ n <= j) \/ (?j. i = BIT1 j /\ n <= j)) /\
+   (!n i. BIT1 n <= i <=>
+          (?j. i = BIT0 j /\ n < j) \/ (?j. i = BIT1 j /\ n <= j))`,
+  REWRITE_TAC[NUMERAL; DENUMERAL (ARITH_RULE `!i. 0 <= i`)] THEN
+  CONJ_TAC THEN REPEAT GEN_TAC THEN REWRITE_TAC[BIT0; BIT1] THEN
+  (EQ_TAC THENL [ALL_TAC; ARITH_TAC] THEN DISCH_TAC THEN
+   ASM_CASES_TAC `EVEN i` THENL [DISJ1_TAC; DISJ2_TAC] THEN
+   MP_TAC (SPEC `i:num` EVEN_EXISTS_LEMMA) THEN ASM_REWRITE_TAC[] THEN
+   DISCH_THEN (X_CHOOSE_THEN `k:num` SUBST_VAR_TAC) THEN
+   EXISTS_TAC `k:num` THEN ASM_ARITH_TAC));;
+
+let ARITH_LE_RIGHT_CLAUSES = prove
+ (`(!n i. i <= NUMERAL n <=> i <= n) /\
+   (!i. i <= _0 <=> i = _0) /\
+   (!n i. i <= BIT0 n <=>
+          (?j. i = BIT0 j /\ j <= n) \/ (?j. i = BIT1 j /\ j < n)) /\
+   (!n i. i <= BIT1 n <=>
+          (?j. i = BIT0 j /\ j <= n) \/ (?j. i = BIT1 j /\ j <= n))`,
+  REWRITE_TAC[NUMERAL; DENUMERAL (ARITH_RULE `!i. i <= 0 <=> i = 0`)] THEN
+  CONJ_TAC THEN REPEAT GEN_TAC THEN REWRITE_TAC[BIT0; BIT1] THEN
+  (EQ_TAC THENL [ALL_TAC; ARITH_TAC] THEN DISCH_TAC THEN
+   ASM_CASES_TAC `EVEN i` THENL [DISJ1_TAC; DISJ2_TAC] THEN
+   MP_TAC (SPEC `i:num` EVEN_EXISTS_LEMMA) THEN ASM_REWRITE_TAC[] THEN
+   DISCH_THEN (X_CHOOSE_THEN `k:num` SUBST_VAR_TAC) THEN
+   EXISTS_TAC `k:num` THEN ASM_ARITH_TAC));;
+
+let ARITH_LT_LEFT_CLAUSES = prove
+ (`(!n i. NUMERAL n < i <=> n < i) /\
+   (!i. _0 < i <=> (?j. i = BIT0 j /\ _0 < j) \/ (?j. i = BIT1 j)) /\
+   (!n i. BIT0 n < i <=>
+          (?j. i = BIT0 j /\ n < j) \/ (?j. i = BIT1 j /\ n <= j)) /\
+   (!n i. BIT1 n < i <=>
+          (?j. i = BIT0 j /\ n < j) \/ (?j. i = BIT1 j /\ n < j))`,
+  REWRITE_TAC[NUMERAL] THEN
+  ONCE_REWRITE_TAC[GSYM (REWRITE_CONV[NUMERAL] `0 < i`)] THEN
+  REPEAT CONJ_TAC THEN REPEAT GEN_TAC THEN REWRITE_TAC[BIT0; BIT1] THEN
+  (EQ_TAC THENL [ALL_TAC; ARITH_TAC] THEN DISCH_TAC THEN
+   ASM_CASES_TAC `EVEN i` THENL [DISJ1_TAC; DISJ2_TAC] THEN
+   MP_TAC (SPEC `i:num` EVEN_EXISTS_LEMMA) THEN ASM_REWRITE_TAC[] THEN
+   DISCH_THEN (X_CHOOSE_THEN `k:num` SUBST_VAR_TAC) THEN
+   EXISTS_TAC `k:num` THEN ASM_ARITH_TAC));;
+
+let ARITH_LT_RIGHT_CLAUSES = prove
+ (`(!n i. i < NUMERAL n <=> i < n) /\
+   (!i. i < _0 <=> F) /\
+   (!n i. i < BIT0 n <=>
+          (?j. i = BIT0 j /\ j < n) \/ (?j. i = BIT1 j /\ j < n)) /\
+   (!n i. i < BIT1 n <=>
+          (?j. i = BIT0 j /\ j <= n) \/ (?j. i = BIT1 j /\ j < n))`,
+  REWRITE_TAC[NUMERAL; DENUMERAL (ARITH_RULE `!i. ~(i < 0)`)] THEN
+  CONJ_TAC THEN REPEAT GEN_TAC THEN REWRITE_TAC[BIT0; BIT1] THEN
+  (EQ_TAC THENL [ALL_TAC; ARITH_TAC] THEN DISCH_TAC THEN
+   ASM_CASES_TAC `EVEN i` THENL [DISJ1_TAC; DISJ2_TAC] THEN
+   MP_TAC (SPEC `i:num` EVEN_EXISTS_LEMMA) THEN ASM_REWRITE_TAC[] THEN
+   DISCH_THEN (X_CHOOSE_THEN `k:num` SUBST_VAR_TAC) THEN
+   EXISTS_TAC `k:num` THEN ASM_ARITH_TAC));;
+
+let FORALL_ARITH_LE_LEFT = prove
+ (`((!i. NUMERAL n <= i ==> P i) <=> (!i. n <= i ==> P (NUMERAL i))) /\
+   ((!i. _0 <= i ==> P i) <=> (!i. P i)) /\
+   ((!i. BIT0 n <= i ==> P i) <=> (!i. n <= i ==> P (BIT0 i)) /\
+                                  (!i. n <= i ==> P (BIT1 i))) /\
+   ((!i. BIT1 n <= i ==> P i) <=> (!i. n < i ==> P (BIT0 i)) /\
+                                  (!i. n <= i ==> P (BIT1 i)))`,
+  REWRITE_TAC[NUMERAL] THEN REPEAT CONJ_TAC THEN REPEAT GEN_TAC THEN
+  GEN_REWRITE_TAC (LAND_CONV o ONCE_DEPTH_CONV) [ARITH_LE_LEFT_CLAUSES] THEN
+  MESON_TAC[]);;
+
+let FORALL_ARITH_LT_LEFT = prove
+ (`((!i. NUMERAL n < i ==> P i) <=> (!i. n < i ==> P (NUMERAL i))) /\
+   ((!i. _0 < i ==> P i) <=> (!i. _0 < i ==> P (BIT0 i)) /\
+                             (!i. P (BIT1 i))) /\
+   ((!i. BIT0 n < i ==> P i) <=> (!i. n < i ==> P (BIT0 i)) /\
+                                 (!i. n <= i ==> P (BIT1 i))) /\
+   ((!i. BIT1 n < i ==> P i) <=> (!i. n < i ==> P (BIT0 i)) /\
+                                 (!i. n < i ==> P (BIT1 i)))`,
+  REWRITE_TAC[NUMERAL] THEN REPEAT CONJ_TAC THEN REPEAT GEN_TAC THEN
+  GEN_REWRITE_TAC (LAND_CONV o ONCE_DEPTH_CONV) [ARITH_LT_LEFT_CLAUSES] THEN
+  MESON_TAC[]);;
+
+let FORALL_ARITH_LE_RIGHT = prove
+ (`((!i. i <= NUMERAL n ==> P i) <=> (!i. i <= n ==> P (NUMERAL i))) /\
+   ((!i. i <= _0 ==> P i) <=> P _0) /\
+   ((!i. i <= BIT0 n ==> P i) <=> (!i. i <= n ==> P (BIT0 i)) /\
+                                  (!i. i < n ==> P (BIT1 i))) /\
+   ((!i. i <= BIT1 n ==> P i) <=> (!i. i <= n ==> P (BIT0 i)) /\
+                                  (!i. i <= n ==> P (BIT1 i)))`,
+  REWRITE_TAC[NUMERAL; ARITH_LE_RIGHT_CLAUSES] THEN MESON_TAC[]);;
+
+let FORALL_ARITH_LT_RIGHT = prove
+ (`((!i. i < NUMERAL n ==> P i) <=> (!i. i < n ==> P (NUMERAL i))) /\
+   ((!i. i < _0 ==> P i) <=> T) /\
+   ((!i. i < BIT0 n ==> P i) <=> (!i. i < n ==> P (BIT0 i)) /\
+                                 (!i. i < n ==> P (BIT1 i))) /\
+   ((!i. i < BIT1 n ==> P i) <=> (!i. i <= n ==> P (BIT0 i)) /\
+                                 (!i. i < n ==> P (BIT1 i)))`,
+  REWRITE_TAC[NUMERAL; ARITH_LT_RIGHT_CLAUSES] THEN MESON_TAC[]);;
+
+(* ------------------------------------------------------------------------- *)
+(* Test;;
+
+(time o PURE_REWRITE_CONV)
+  [FORALL_ARITH_LE_RIGHT; FORALL_ARITH_LT_RIGHT;
+   ARITH_LE; ARITH_LT;
+   MESON [] `(T /\ p <=> p) /\ (p /\ T <=> p) /\
+             (F /\ p <=> F) /\ (p /\ F <=> F) /\
+             (T \/ p <=> T) /\ (p \/ T <=> T) /\
+             (F \/ p <=> p) /\ (p \/ F <=> p) /\
+             ((F ==> p) <=> T) /\
+             ((p ==> T) <=> T) /\
+             ((T ==> p) <=> p) `]
+  `!i. i < 1056 ==> 20 <= i ==> i <= 800 \/ Q i`;;                           *)
+(* ------------------------------------------------------------------------- *)
+
+let ARITH_NUMSEG = prove
+ (`(!m n. NUMERAL m..NUMERAL n = m..n) /\
+   (!n. _0..n = _0 INSERT (BIT1 _0..n)) /\
+   (!m n. m < n ==> BIT0 m..BIT0 n =
+                    IMAGE BIT0 (m..n) UNION IMAGE BIT1 (m..PRE n)) /\
+   (!m n. BIT0 m..BIT1 n = IMAGE BIT0 (m..n) UNION IMAGE BIT1 (m..n)) /\
+   (!m n. m < n ==> BIT1 m..BIT0 n =
+                    IMAGE BIT0 (SUC m..n) UNION IMAGE BIT1 (m..PRE n)) /\
+   (!m n. m < n ==> BIT1 m..BIT1 n =
+                    IMAGE BIT0 (SUC m..n) UNION IMAGE BIT1 (m..n))`,
+  CONJ_TAC THENL [REWRITE_TAC[NUMERAL]; ALL_TAC] THEN
+  SUBGOAL_THEN `_0 = 0` (fun th -> ONCE_REWRITE_TAC[th]) THENL
+  [REWRITE_TAC[NUMERAL]; ALL_TAC] THEN
+  SUBGOAL_THEN `BIT0 = (\n. 2 * n) /\ BIT1 = (\n. 2 * n + 1)`
+    (fun th -> ONCE_REWRITE_TAC[th]) THENL
+  [CONJ_TAC THEN REWRITE_TAC[FUN_EQ_THM] THEN GEN_TAC THEN
+   GEN_REWRITE_TAC LAND_CONV [BIT0; BIT1] THEN ARITH_TAC;
+   BETA_TAC] THEN
+  CLAIM_TAC "rmk" `!x. (?y. x = 2 * y) \/ (?y. x = 2 * y + 1)` THENL
+  [REWRITE_TAC[GSYM ADD1] THEN MESON_TAC[NOT_EVEN; EVEN_EXISTS; ODD_EXISTS];
+   ALL_TAC] THEN
+  REPEAT STRIP_TAC THEN MATCH_MP_TAC SUBSET_ANTISYM THEN
+  REWRITE_TAC[SUBSET; IN_NUMSEG; FORALL_IN_INSERT;
+              FORALL_IN_UNION; FORALL_IN_IMAGE] THEN
+  REWRITE_TAC[IN_INSERT; IN_IMAGE; IN_UNION; IN_NUMSEG] THEN
+  REPEAT STRIP_TAC THEN (TRY ASM_ARITH_TAC) THEN
+  (HYP_TAC "rmk: (@y. y) | (@y. y)" (SPEC `x:num`) THEN
+   POP_ASSUM SUBST_VAR_TAC THENL
+   [DISJ1_TAC THEN EXISTS_TAC `y:num` THEN ASM_ARITH_TAC;
+    DISJ2_TAC THEN EXISTS_TAC `y:num` THEN ASM_ARITH_TAC]));;
+
+(* ------------------------------------------------------------------------- *)
+(* Conversion from numseg to ntrie.                                          *)
+(* ------------------------------------------------------------------------- *)
+
+loadt "Ntrie/ntrie.ml";;
+
+let pth_ARITH_NUMSEG_NTRIE = prove
+ (`(!m n s. m..n = s <=> NUMERAL m..NUMERAL n = NTRIE s) /\
+   (!n s. BIT1 _0..n = s ==> _0..n = _0 INSERT s) /\
+   (!m n s s'. m < n /\ m..n = s /\ m..PRE n = s'
+               ==> BIT0 m..BIT0 n = NNODE s s') /\
+   (!m n s. m..n = s ==> BIT0 m..BIT1 n = NNODE s s) /\
+   (!m n s s'. m < n /\ SUC m..n = s /\ m..PRE n = s'
+               ==> BIT1 m..BIT0 n = NNODE s s') /\
+   (!m n s s'. m < n /\ SUC m..n = s /\ m..n = s'
+               ==> BIT1 m..BIT1 n = NNODE s s')`,
+  REPEAT STRIP_TAC THEN REPEAT (FIRST_X_ASSUM SUBST_VAR_TAC) THEN
+  ASM_SIMP_TAC[NNODE; NTRIE; ARITH_NUMSEG]);;
+
+
+
+
+let pth_ARITH_NUMSEG = prove
+ (`(!m n. NUMERAL m..NUMERAL n = m..n) /\
+   (!n s. BIT1 _0..n = s ==> _0..n = _0 INSERT s) /\
+   (!m n s s'. m < n /\ m..n = s /\ m..PRE n = s'
+               ==> BIT0 m..BIT0 n = IMAGE BIT0 s UNION IMAGE BIT1 s') /\
+   (!m n s. m..n = s
+            ==> BIT0 m..BIT1 n = IMAGE BIT0 s UNION IMAGE BIT1 s) /\
+   (!m n s s'. m < n /\ SUC m..n = s /\ m..PRE n = s'
+               ==> BIT1 m..BIT0 n = IMAGE BIT0 s UNION IMAGE BIT1 s') /\
+   (!m n s s'. m < n /\ SUC m..n = s /\ m..n = s'
+               ==> BIT1 m..BIT1 n = IMAGE BIT0 s UNION IMAGE BIT1 s')`,
+  REPEAT STRIP_TAC THEN REPEAT (FIRST_X_ASSUM SUBST_VAR_TAC) THEN
+  ASM_SIMP_TAC[ARITH_NUMSEG]);;
+
+let ITERATE_ARITH = prove
+ (`!op:A->A->A.
+     monoidal op
+     ==> (!f m n. iterate op (NUMERAL m..NUMERAL n) f =
+                  iterate op (m..n) (\i. f (NUMERAL i))) /\
+         (!f n. iterate op (_0..n) f =
+                op (f _0) (iterate op (BIT1 _0..n) f)) /\
+         (!f m n.
+            m < n
+            ==> iterate op (BIT0 m..BIT0 n) f =
+                op (iterate op (m..n) (\i. f(BIT0 i)))
+                   (iterate op (m..PRE n) (\i. f(BIT1 i)))) /\
+         (!f m n. iterate op (BIT0 m..BIT1 n) f =
+                  op (iterate op (m..n) (\i. f(BIT0 i)))
+                     (iterate op (m..n) (\i. f(BIT1 i)))) /\
+         (!f m n.
+            m < n
+            ==> iterate op (BIT1 m..BIT0 n) f =
+                op (iterate op (SUC m..n) (\i. f(BIT0 i)))
+                   (iterate op (m..PRE n) (\i. f(BIT1 i)))) /\
+         (!f m n.
+            m < n
+            ==> iterate op (BIT1 m..BIT1 n) f =
+                op (iterate op (SUC m..n) (\i. f(BIT0 i)))
+                   (iterate op (m..n) (\i. f(BIT1 i))))`,
+  INTRO_TAC "!op; mon" THEN
+  CONJ_TAC THENL [REWRITE_TAC[NUMERAL; ETA_AX]; ALL_TAC] THEN
+  SIMP_TAC[ARITH_NUMSEG] THEN
+  CONJ_TAC THENL
+  [REPEAT GEN_TAC THEN ASM_SIMP_TAC[ITERATE_CLAUSES; FINITE_NUMSEG] THEN
+   SUBGOAL_THEN `~(0 IN 1..n)` (fun th -> REWRITE_TAC[DENUMERAL th]) THEN
+   REWRITE_TAC[IN_NUMSEG] THEN ARITH_TAC;
+   ALL_TAC] THEN
+  SUBGOAL_THEN
+    `!f s t. FINITE s /\ FINITE t
+             ==> iterate op (IMAGE BIT0 s UNION IMAGE BIT1 t) f : A =
+                 op (iterate op s (f o BIT0)) (iterate op t (f o BIT1))`
+    (fun th -> SIMP_TAC[th; o_DEF; FINITE_NUMSEG]) THEN
+  REPEAT STRIP_TAC THEN
+  TRANS_TAC EQ_TRANS
+    `op (iterate op (IMAGE BIT0 s) f) (iterate op (IMAGE BIT1 t) f):A` THEN
+  CONJ_TAC THENL
+  [USE_THEN "mon" (fun th -> MATCH_MP_TAC (MATCH_MP ITERATE_UNION th)) THEN
+   ASM_SIMP_TAC[FINITE_IMAGE] THEN
+   SUBGOAL_THEN `!i j. ~(BIT0 i = BIT1 j)` (fun th -> SET_TAC[th]) THEN
+   REWRITE_TAC[ARITH_EQ];
+   BINOP_TAC THEN USE_THEN "mon"
+     (MATCH_MP_TAC o MATCH_MP (INST_TYPE [`:X`,`:A`] ITERATE_IMAGE)) THEN
+   SIMP_TAC[ARITH_EQ]]);;
+
+let pth_ITERATE_ARITH = prove
+ (`!op:A->A->A.
+      monoidal op
+      ==> (!f m n. iterate op (NUMERAL m..NUMERAL n) f =
+                  iterate op (m..n) (\i. f (NUMERAL i))) /\
+          (!f n r. iterate op (BIT1 _0..n) f = r
+                   ==> iterate op (_0..n) f = op (f _0) r) /\
+          (!f m n r s. m < n /\
+                       iterate op     (m..n) (\i. f(BIT0 i)) = r /\
+                       iterate op (m..PRE n) (\i. f(BIT1 i)) = s
+                       ==> iterate op (BIT0 m..BIT0 n) f = op r s) /\
+          (!f m n r s. iterate op (m..n) (\i. f(BIT0 i)) = r /\
+                       iterate op (m..n) (\i. f(BIT1 i)) = s
+                       ==> iterate op (BIT0 m..BIT1 n) f = op r s) /\
+          (!f m n r s. m < n /\
+                       iterate op (SUC m..n) (\i. f(BIT0 i)) = r /\
+                       iterate op (m..PRE n) (\i. f(BIT1 i)) = s
+                       ==> iterate op (BIT1 m..BIT0 n) f = op r s) /\
+          (!f m n r s. m < n /\
+                       iterate op (SUC m..n) (\i. f(BIT0 i)) = r /\
+                       iterate op     (m..n) (\i. f(BIT1 i)) = s
+                       ==> iterate op (BIT1 m..BIT1 n) f = op r s)`,
+  GEN_TAC THEN DISCH_THEN (ASSUME_TAC o MATCH_MP ITERATE_ARITH) THEN
+  ASM_SIMP_TAC[]);;
+
+let mon_th = MONOIDAL_REAL_ADD;;
+let iter_th = sum;;
+
+let numseg_thm = `..`;;
+let dest_numseg = dest_binary "..";;
+let mtm = `m:num`
+and ntm = `n:num`;;
+let [pth0; pth1; pth2; pth3; pth4; pth5] =
+  let pth = MATCH_MP pth_ITERATE_ARITH mon_th in
+  map SPEC_ALL (CONJUNCTS (ONCE_REWRITE_RULE [GSYM iter_th] pth));;
+let iter_tm = rator (rator (lhand (concl pth0)));;
+
+search[`iterate op (m..n) f`];;
+
+let tm = `sum (2..7) f`;;
+let mtm,ntm,ftm =
+  try let t,ftm = dest_comb tm in
+      let itm,stm = dest_comb t in
+      if itm <> iter_tm then fail() else
+      let mtm,ntm = dest_numseg stm in
+      mtm,ntm,ftm
+  with Failure _ -> failwith "ITERATE_CONV: not a numseg iteration";;
+let mtm,ntm = dest_numeral mtm,dest_numeral ntm;;
+if mtm >/ ntm then 

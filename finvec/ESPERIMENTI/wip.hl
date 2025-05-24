@@ -1,0 +1,50 @@
+
+(* ------------------------------------------------------------------------- *)
+
+(*
+iterate op (2 * m .. 2 * n) f =
+iterate op (m..n) (\i. f(2 * i)) + iterate op (m..PRE n) (\i. f(2 * i + 1) /\
+iterate op (2 * m + 1 .. 2 * n + 1) f =
+iterate op (m..n) (\i. f(2 * i + 1)) + iterate op (SUC m..n) (\i. f(2 * i) /\
+iterate op (2 * m .. 2 * n + 1) f =
+iterate op (m..n) (\i. f(2 * i)) + iterate op (m..n) (\i. f(2 * i + 1) /\
+iterate op (2 * m + 1 .. 2 * n) f =
+iterate op (m..PRE n) (\i. f(2 * i + 1)) + iterate op (m..n) (\i. f(2 * i + 1) /\
+*)
+
+(*
+let VSUM_ARITH = prove
+ (`vsum (NUMERAL m..NUMERAL n) f = vsum (m..n) (\i. f (NUMERAL i)):real^N /\
+   vsum (_0.._0) f = f _0 /\
+   vsum (_0..BIT0 n) f = f _0 + vsum (BIT1 _0..BIT0 n) f /\
+   vsum (_0..BIT1 n) f = vsum (_0..n) (\i. f (BIT0 i) + f (BIT1 i)) /\
+   vsum (BIT0 m..BIT0 n) f = vsum (m..n) (\i. f (BIT0 i) + f (BIT1 i)) /\
+   vsum (BIT1 m..BIT1 n) f = vsum (m..n) (\i. f (BIT1 i) + f (BIT0 (SUC i))) /\
+`
+;;
+*)
+
+VSUM_PAIR;;
+VSUM_PAIR_0;;
+VSUM_SUC;;
+
+
+(*
+vsum (m..n) f = if m <= n then f m + vsum (SUC m..n) else vec 0
+
+prove
+ (`BIT0 m..BIT0 n = IMAGE BIT0 (m..n) UNION IMAGE BIT1 (m..PRE n)`,
+
+  REWRITE_TAC[EXTENSION; BIT0; BIT1; IN_NUMSEG; IN_UNION; IN_IMAGE] THEN
+  GEN_TAC THEN
+  EQ_TAC THEN
+
+   STRIP_TAC THEN
+   ASM_CASES_TAC `EVEN x` THENL
+    DISJ1_TAC THEN
+    
+   EXISTS_TAC `n:num` THEN
+  ASM_ARITH_TAC
+
+;;
+*)

@@ -1,0 +1,202 @@
+(* ========================================================================= *)
+(* Zero-based indexed vectors.                                               *)
+(*                                                                           *)
+(* Vectors in HOL Light uses one-based indexes by default.  This file        *)
+(* provides some basic constants and theorems to work with HOL vectors       *)
+(* using zero-indexes instead.                                               *)
+(*                                                                           *)
+(* (c) Copyright, Andrea Gabrielli, Marco Maggesi 2017-2018                  *)
+(* ========================================================================= *)
+
+(* ------------------------------------------------------------------------- *)
+(* Miscellanea on vectors and matrices.                                      *)
+(* ------------------------------------------------------------------------- *)
+
+let DIMINDEX_GT_0 = prove
+ (`!s:N->bool. 0 < dimindex s`,
+  GEN_TAC THEN SUBGOAL_THEN `1 <= dimindex (s:N->bool)` MP_TAC THENL
+  [REWRITE_TAC[DIMINDEX_GE_1]; ARITH_TAC]);;
+
+let VECTOR_1_GEN = prove
+ (`!v:A^1 i. v$i = v$1`,
+  GEN_TAC THEN GEN_TAC THEN
+  SUBGOAL_THEN
+    `?k. 1 <= k /\ k <= dimindex (:1) /\ (!x:A^1. x$i = x$k)`
+    (DESTRUCT_TAC "@k. k1 + eq") THENL
+  [MATCH_ACCEPT_TAC FINITE_INDEX_INRANGE; ALL_TAC] THEN
+  REWRITE_TAC[DIMINDEX_1] THEN DISCH_TAC THEN
+  SUBGOAL_THEN `k = 1` SUBST_VAR_TAC THENL
+  [ASM_ARITH_TAC; ASM_REWRITE_TAC[]]);;
+
+let MATRIX_MUL_COMPONENT_ALT = prove
+ (`!A:real^N^M B:real^P^N i j.
+     1 <= i /\ i <= dimindex (:M) /\
+     1 <= j /\ j <= dimindex (:P)
+     ==> (A ** B)$i$j =
+         sum (1..dimindex(:N)) (\k. A$i$k * B$k$j)`,
+  SIMP_TAC[matrix_mul; LAMBDA_BETA]);;
+
+let VECTOR_MATRIX_MUL_COMPONENT = prove
+ (`!u:real^N A:real^M^N i. 1 <= i /\ i <= dimindex(:M)
+                           ==> (u ** A)$i = u dot (column i A)`,
+  REPEAT GEN_TAC THEN STRIP_TAC THEN REWRITE_TAC[vector_matrix_mul; dot] THEN
+  ASM_SIMP_TAC[LAMBDA_BETA] THEN MATCH_MP_TAC SUM_EQ THEN
+  REWRITE_TAC[IN_NUMSEG; ETA_AX; column] THEN ASM_SIMP_TAC[LAMBDA_BETA] THEN
+  REAL_ARITH_TAC);;
+
+(* ------------------------------------------------------------------------- *)
+(* The zero-based indexing operator is denoted `$.` (dollar dot).            *)
+(* The binder for zero-based vectors is denote `lambda0`.                    *)
+(* ------------------------------------------------------------------------- *)
+
+parse_as_infix("$.",get_infix_status "$");;
+parse_as_binder "lambda0";;
+
+let component0 = new_definition
+  `v:A^N $. i = v$(i+1) `;;
+
+let lambda0 = new_definition
+  `(lambda0) g:A^N = (lambda) (\i. g (i - 1))`;;
+
+let LAMBDA0_BETA = prove
+ (`!i. i < dimindex (:B) ==> ((lambda0) g:A^B)$.i = g i`,
+  REPEAT STRIP_TAC THEN REWRITE_TAC[lambda0; component0] THEN
+  TRANS_TAC EQ_TRANS `(\i. g (i - 1):A) (i + 1)` THEN CONJ_TAC THENL
+  [MATCH_MP_TAC LAMBDA_BETA THEN ASM_ARITH_TAC;
+   REWRITE_TAC[] THEN AP_TERM_TAC THEN ARITH_TAC]);;
+
+let FINITE_COMPONENT0_INRANGE = prove
+ (`!i. ?k. k < dimindex(:N) /\ (!x:A^N. x$.i = x$.k)`,
+  GEN_TAC THEN REWRITE_TAC[component0] THEN
+  SUBGOAL_THEN
+    `?k. 1 <= k /\ k <= dimindex(:N) /\ (!x:A^N. x$(i+1) = x$k)`
+    STRIP_ASSUME_TAC THENL
+  [MATCH_ACCEPT_TAC FINITE_INDEX_INRANGE;
+   POP_ASSUM (fun th -> ONCE_REWRITE_TAC[th])] THEN
+  EXISTS_TAC `k - 1` THEN
+  ASM_SIMP_TAC[ARITH_RULE `1 <= k ==> k - 1 + 1 = k`] THEN ASM_ARITH_TAC);;
+
+(* ------------------------------------------------------------------------- *)
+(* Extensional equality using zero-based indexing.                           *)
+(* ------------------------------------------------------------------------- *)
+
+let CART_EQ0 = prove
+ (`!x y:A^N. x = y <=> (!i. i < dimindex(:N) ==> x$.i = y$.i)`,
+  REPEAT GEN_TAC THEN EQ_TAC THENL [SIMP_TAC[]; ALL_TAC] THEN
+  REWRITE_TAC[component0; CART_EQ] THEN REPEAT STRIP_TAC THEN
+  FIRST_X_ASSUM (MP_TAC o SPEC `i - 1`) THEN
+  SUBGOAL_THEN `i - 1 + 1 = i` (fun th -> REWRITE_TAC[th]) THENL
+  [ASM_ARITH_TAC; DISCH_THEN MATCH_MP_TAC THEN ASM_ARITH_TAC]);;
+
+let CART_EQ0_FULL = prove
+ (`!x y:A^N. x = y <=> (!i. x$.i = y$.i)`,
+  REPEAT GEN_TAC THEN EQ_TAC THEN SIMP_TAC[] THEN SIMP_TAC[CART_EQ0]);;
+
+(* ------------------------------------------------------------------------- *)
+(* Conversion between one-based and zero-based notation.                     *)
+(* ------------------------------------------------------------------------- *)
+
+let LAMBDA_EQ_LAMBDA0 = prove
+ (`!f:num-> A. (lambda) f : A^N = lambda0 i. f (i + 1)`,
+  GEN_TAC THEN REWRITE_TAC[lambda0; CART_EQ] THEN
+  SIMP_TAC[LAMBDA_BETA; ARITH_RULE `!i. 1 <= i ==> i - 1 + 1 = i`]);;
+
+let INDEX_EQ_COMPONENT0 = prove
+ (`!x:A^N i. 1 <= i ==> x$i = x$.(i-1)`,
+  GEN_TAC THEN REWRITE_TAC[component0] THEN
+  SIMP_TAC[ARITH_RULE `1 <= i ==> (i-1)+1 = i`]);;
+
+(* ------------------------------------------------------------------------- *)
+(* Special case in dimension 1.                                              *)
+(* ------------------------------------------------------------------------- *)
+
+let VECTOR0_1_GEN = prove
+ (`!v:A^1 i. v$.i = v$.0`,
+  GEN_TAC THEN GEN_TAC THEN REWRITE_TAC[component0] THEN
+  ONCE_REWRITE_TAC[VECTOR_1_GEN] THEN REFL_TAC);;
+
+(* ------------------------------------------------------------------------- *)
+(* Basic algebraic operations on real vectors.                               *)
+(* ------------------------------------------------------------------------- *)
+
+let VECTOR_ADD_COMPONENT0 = prove
+ (`!x y:real^N i. (x + y) $. i = x $. i + y $. i`,
+  REWRITE_TAC[component0; VECTOR_ADD_COMPONENT]);;
+
+let VECTOR_SUB_COMPONENT0 = prove
+ (`!x y:real^N i. (x - y) $. i = x $. i - y $. i`,
+  REWRITE_TAC[component0; VECTOR_SUB_COMPONENT]);;
+
+let VECTOR_NEG_COMPONENT0 = prove
+ (`!x:real^N i. (--x) $. i = -- (x $. i)`,
+  REWRITE_TAC[component0; VECTOR_NEG_COMPONENT]);;
+
+let VECTOR_MUL_COMPONENT0 = prove
+ (`!c x:real^N i. (c % x) $. i = c * (x $. i)`,
+  REWRITE_TAC[component0; VECTOR_MUL_COMPONENT]);;
+
+let DOT0 = prove
+ (`!x y:real^N. x dot y = sum {i | i < dimindex(:N)} (\i. x$.i * y$.i)`,
+  GEN_TAC THEN GEN_TAC THEN REWRITE_TAC[dot; component0] THEN
+  SIMP_TAC[SUM_OFFSET_0; DIMINDEX_GE_1] THEN AP_THM_TAC THEN AP_TERM_TAC THEN
+  REWRITE_TAC[EXTENSION; IN_NUMSEG; IN_ELIM_THM] THEN GEN_TAC THEN
+  SUBGOAL_THEN `1 <= dimindex(:N)` MP_TAC THENL
+  [REWRITE_TAC[DIMINDEX_GE_1]; ARITH_TAC]);;
+
+(* ------------------------------------------------------------------------- *)
+(* Basic algebraic operations on real matrices.                              *)
+(* ------------------------------------------------------------------------- *)
+
+let COLUMN_COMPONENT = prove
+ (`!A:real^M^N i j.
+     1 <= i /\ i <= dimindex (:N)
+     ==> column j A$i = A$i$j`,
+  SIMP_TAC[column; LAMBDA_BETA]);;
+
+let COLUMN_COMPONENT0 = prove
+ (`!A:real^M^N i j.
+     i < dimindex (:N)
+     ==> column (j + 1) A$.i = A$.i$.j`,
+  REWRITE_TAC[column; component0] THEN
+  SIMP_TAC[LAMBDA_BETA; ARITH_RULE `1 <= i + 1 /\ (i < n ==> i + 1 <= n)`]);;
+
+let MATRIX_ADD_COMPONENT0 = prove
+ (`!A B:real^M^N i j. (A + B)$.i$.j = A$.i$.j + B$.i$.j`,
+  REWRITE_TAC[component0; MATRIX_ADD_COMPONENT]);;
+
+let MATRIX_SUB_COMPONENT0 = prove
+ (`!A B:real^M^N i j. (A - B)$.i$.j = A$.i$.j - B$.i$.j`,
+  REWRITE_TAC[component0; MATRIX_SUB_COMPONENT]);;
+
+let MATRIX_NEG_COMPONENT0 = prove
+ (`!A:real^M^N i j. (--A)$.i$.j = --(A$.i$.j)`,
+  REWRITE_TAC[component0; MATRIX_NEG_COMPONENT]);;
+
+let MATRIX_CMUL_COMPONENT0 = prove
+ (`!c A:real^M^N i j. (c %% A)$.i$.j = c * (A$.i$.j)`,
+  REWRITE_TAC[component0; MATRIX_CMUL_COMPONENT]);;
+
+let MATRIX_VECTOR_MUL_COMPONENT0 = prove
+ (`!A:real^N^M x:real^N k. k < dimindex (:M) ==> (A ** x) $. k = A $. k dot x`,
+  REPEAT GEN_TAC THEN DISCH_TAC THEN REWRITE_TAC[component0] THEN
+  MATCH_MP_TAC MATRIX_VECTOR_MUL_COMPONENT THEN ASM_ARITH_TAC);;
+
+let VECTOR_MATRIX_MUL_COMPONENT0 = prove
+ (`!u:real^N A:real^M^N i. i < dimindex(:M)
+                           ==> (u ** A)$.i = u dot (column (i + 1) A)`,
+  REPEAT GEN_TAC THEN DISCH_TAC THEN REWRITE_TAC[component0] THEN
+  MATCH_MP_TAC VECTOR_MATRIX_MUL_COMPONENT THEN ASM_ARITH_TAC);;
+
+let MATRIX_MUL_COMPONENT0 = prove
+ (`!A:real^N^M B:real^P^N i j.
+     i < dimindex (:M) /\
+     j < dimindex (:P)
+     ==> (A ** B)$.i$.j =
+         sum {i | i < dimindex(:N)} (\k. A$.i$.k * B$.k$.j)`,
+  REPEAT GEN_TAC THEN STRIP_TAC THEN
+  ASM_SIMP_TAC[component0; MATRIX_MUL_COMPONENT_ALT;
+               ARITH_RULE `1 <= i + 1 /\ (i < n ==> i + 1 <= n)`] THEN
+  SIMP_TAC[SUM_OFFSET_0; DIMINDEX_GE_1] THEN AP_THM_TAC THEN AP_TERM_TAC THEN
+  REWRITE_TAC[EXTENSION; IN_NUMSEG; IN_ELIM_THM] THEN
+  SUBGOAL_THEN `1 <= dimindex(:N)` MP_TAC THENL
+  [REWRITE_TAC[DIMINDEX_GE_1]; ARITH_TAC]);;

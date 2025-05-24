@@ -1,0 +1,125 @@
+(* ========================================================================= *)
+(* Boolean vectors over fintypes.                                            *)
+(*                                                                           *)
+(* (c) Copyright, Andrea Gabrielli, Marco Maggesi 2017-2018                  *)
+(* ========================================================================= *)
+
+(* +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ *)
+(* TODO: Da rimuovere.                                                       *)
+(* +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ *)
+
+let BIT0_DOUBLE = prove
+ (`!n. BIT0 n = 2 * n`,
+  GEN_TAC THEN CONV_TAC (RATOR_CONV (REWRITE_CONV[BIT0])) THEN
+  ARITH_TAC);;
+
+let BIT1_DOUBLE = prove
+ (`!n. BIT1 n = 2 * n + 1`,
+  GEN_TAC THEN CONV_TAC (RATOR_CONV (REWRITE_CONV[BIT1])) THEN
+  ARITH_TAC);;
+
+(* TODO: Da rimuovere in favore di VEC1_DEF. *)
+let VEC1_DEF_OLD = prove
+ (`!x y a. vec1 (x:A^N) (y:A^N) (a:A) : A^N tybit1 =
+           lambda0 i. if i = BIT0 (dimindex(:N)) then a else
+                      (if EVEN i then x else y)$.(i DIV 2)`,
+  CONV_TAC (ONCE_DEPTH_CONV BITS_ELIM_CONV) THEN
+  REWRITE_TAC[VEC1_DEF]);;
+
+(* ------------------------------------------------------------------------- *)
+(* Addition and negation over boolean vectors.                               *)
+(* ------------------------------------------------------------------------- *)
+
+overload_interface("+",`bool_add:bool->bool->bool`);;
+
+let bool_add = define
+ `!b1 b2:bool. b1 + b2 = ((b1 /\ ~b2) \/ (~b1 /\ b2))`;;
+
+overload_interface("+",`bvector_add:bool^N->bool^N->bool^N`);;
+overload_interface("--",`bvector_neg:bool^N->bool^N`);;
+
+let bvector_add = define
+ `!b1 b2:bool^N. b1 + b2 = (lambda0 i. b1 $.i + b2 $.i)`;;
+
+let bvector_neg = define
+ `!b:bool^N. -- b = (lambda0 i. ~ (b $.i))`;;
+
+let BVECTOR_ADD_COMPONENT = prove
+ (`!b1 b2:bool^N i. i < dimindex(:N) ==>
+                    (b1 + b2) $. i = b1 $.i + b2 $.i`,
+  SIMP_TAC[bvector_add; LAMBDA0_BETA]);;
+
+let BVECTOR_NEG_COMPONENT = prove
+ (`!b:bool^N i. i < dimindex(:N) ==>
+                    (-- b) $. i = ~ (b$.i)`,
+  SIMP_TAC[bvector_neg; LAMBDA0_BETA]);;
+
+let BOOL_FINVEC_ADD_COMPONENT =
+  let BOOL_VECX_ADD = prove
+   (`!x:bool y. vecx x + vecx y = vecx (x + y)`,
+    REWRITE_TAC[CART_EQ0] THEN
+    SIMP_TAC[VECX_DEF; LAMBDA0_BETA; BVECTOR_ADD_COMPONENT])
+  and BOOL_VEC0_ADD = prove
+   (`!x y:bool^N z t. vec0 x y + vec0 z t = vec0 (x + z) (y + t)`,
+    REPEAT GEN_TAC THEN REWRITE_TAC[CART_EQ0] THEN GEN_TAC THEN
+    SIMP_TAC[VEC0_DEF; BVECTOR_ADD_COMPONENT] THEN
+    REWRITE_TAC[DIMINDEX_TYBIT0] THEN INTRO_TAC "hyp" THEN
+    ASM_SIMP_TAC[LAMBDA0_BETA; DIMINDEX_TYBIT0; DIMINDEX_2] THEN
+    COND_CASES_TAC THEN
+    ASM_SIMP_TAC[GSYM BVECTOR_ADD_COMPONENT;
+                 ARITH_RULE`i < 2 * a /\ 1 <= a ==> i DIV 2 < a`;
+                 DIMINDEX_GE_1])
+  and BOOL_VEC1_ADD = prove
+   (`!x:bool^N y z t a b. vec1 x y a + vec1 z t b =
+                             vec1 (x + z) (y + t) (a + b)`,
+    REPEAT GEN_TAC THEN REWRITE_TAC[CART_EQ0] THEN GEN_TAC THEN
+    SIMP_TAC[VEC1_DEF_OLD; BVECTOR_ADD_COMPONENT] THEN
+    REWRITE_TAC[DIMINDEX_TYBIT1] THEN INTRO_TAC "hyp" THEN
+    ASM_SIMP_TAC[LAMBDA0_BETA; DIMINDEX_TYBIT1] THEN
+    COND_CASES_TAC THEN
+    ASM_SIMP_TAC[GSYM BVECTOR_ADD_COMPONENT;
+                 ARITH_RULE`i < 2 * a /\ 1 <= a ==> i DIV 2 < a`;
+                 DIMINDEX_GE_1] THEN
+    COND_CASES_TAC THEN
+   POP_ASSUM MP_TAC THEN POP_ASSUM (LABEL_TAC "hp") THEN STRIP_TAC THEN
+   HYP_TAC "hp" (ONCE_REWRITE_RULE[BIT0_DOUBLE]) THEN
+   ASM_SIMP_TAC[GSYM BVECTOR_ADD_COMPONENT;
+                 ARITH_RULE`i < 2 * a + 1 /\ 1 <= a /\ ~(i = 2 * a)
+                            ==> i DIV 2 < a`;
+                 DIMINDEX_GE_1]) in
+  end_itlist CONJ [BOOL_VECX_ADD; BOOL_VEC0_ADD; BOOL_VEC1_ADD];;
+
+let BOOL_FINVEC_NEG_COMPONENT =
+  let BOOL_VECX_NEG = prove
+   (`!x:bool. -- vecx x = vecx (~ x)`,
+    REWRITE_TAC[CART_EQ0] THEN
+    SIMP_TAC[VECX_DEF; BVECTOR_NEG_COMPONENT; LAMBDA0_BETA])
+  and BOOL_VEC0_NEG = prove
+   (`!x:bool^N y. -- vec0 x y = vec0 (-- x) (-- y)`,
+     REPEAT GEN_TAC THEN REWRITE_TAC[CART_EQ0] THEN GEN_TAC THEN
+    SIMP_TAC[VEC0_DEF; BVECTOR_NEG_COMPONENT] THEN
+    REWRITE_TAC[DIMINDEX_TYBIT0] THEN INTRO_TAC "hyp" THEN
+    ASM_SIMP_TAC[LAMBDA0_BETA; DIMINDEX_TYBIT0; DIMINDEX_2] THEN
+    COND_CASES_TAC THEN
+    ASM_SIMP_TAC[GSYM BVECTOR_NEG_COMPONENT;
+                 ARITH_RULE`i < 2 * a /\ 1 <= a ==> i DIV 2 < a`;
+                 DIMINDEX_GE_1])
+  and BOOL_VEC1_NEG = prove
+   (`!x:bool^N y a. -- vec1 x y a =
+                        vec1 (-- x) (-- y) (~ a)`,
+    REPEAT GEN_TAC THEN REWRITE_TAC[CART_EQ0] THEN GEN_TAC THEN
+    SIMP_TAC[VEC1_DEF_OLD; BVECTOR_NEG_COMPONENT] THEN
+    REWRITE_TAC[DIMINDEX_TYBIT1] THEN INTRO_TAC "hyp" THEN
+    ASM_SIMP_TAC[LAMBDA0_BETA; DIMINDEX_TYBIT1] THEN
+    COND_CASES_TAC THEN
+    ASM_SIMP_TAC[GSYM BVECTOR_NEG_COMPONENT;
+                 ARITH_RULE`i < 2 * a /\ 1 <= a ==> i DIV 2 < a`;
+                 DIMINDEX_GE_1] THEN
+    COND_CASES_TAC THEN
+   POP_ASSUM MP_TAC THEN POP_ASSUM (LABEL_TAC "hp") THEN STRIP_TAC THEN
+   HYP_TAC "hp" (ONCE_REWRITE_RULE[BIT0_DOUBLE]) THEN
+   ASM_SIMP_TAC[GSYM BVECTOR_NEG_COMPONENT;
+                 ARITH_RULE`i < 2 * a + 1 /\ 1 <= a /\ ~(i = 2 * a)
+                            ==> i DIV 2 < a`;
+                 DIMINDEX_GE_1])in
+  end_itlist CONJ [BOOL_VECX_NEG; BOOL_VEC0_NEG; BOOL_VEC1_NEG];;

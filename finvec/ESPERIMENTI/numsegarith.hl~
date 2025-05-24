@@ -1,0 +1,22 @@
+g `!n. n = 0 \/ (?m. 0 < m \/ n = 2 * m) /\ (?m. n = 2 * m + 1)`;;
+e (GEN_TAC THEN STRIP_ASSUME_TAC (SPEC `n:num` EVEN_OR_ODD));;
+e (POP_ASSUM (MP_TAC o REWRITE_RULE[EVEN_EXISTS]));;
+e (DISCH_THEN STRUCT_CASES_TAC);;
+
+
+e (POP_ASSUM (MP_TAC o MATCH_MP EVEN_EXISTS));;
+e (GEN_TAC THEN ASM_CASES_TAC `EVEN n`);;
+e (ASM_CASES_TAC `n = 0` THEN ASM_REWRITE_TAC[]);;
+e (ASSUME_TAC (SPEC `n:num` EVEN_EXISTS
+
+
+search [`n = 2 * m`];;
+
+g `!m n. m < BIT0 n <=> (?p. m = BIT1 p /\ m <= n)`;;
+e (CONV_TAC BITS_ELIM_CONV);;
+e (REPEAT GEN_TAC);;
+
+search[`?m. i = BIT0 m`];;
+
+
+e ARITH_TAC;;

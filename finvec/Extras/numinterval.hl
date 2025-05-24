@@ -1,0 +1,71 @@
+(* ========================================================================= *)
+(* Experiments with "numintervals", i.e., subsets of `:num` expressed by     *)
+(* inequalities such us m <= i /\ i <= n.                                    *)
+(* ========================================================================= *)
+
+let NUMINTERVAL_DENUMERAL = prove
+ (`!m n i.NUMERAL m <= i /\ i <= NUMERAL n <=> m <= i /\ i <= n`,
+  REWRITE_TAC[NUMERAL]);;
+
+let NUMINTERVAL_REFL = prove
+ (`!n i. n <= i /\ i <= n <=> i = n`,
+  ARITH_TAC);;
+
+let NUMINTERVAL_BIT0_BIT1 = prove
+ (`!m n i. BIT0 m <= i /\ i <= BIT1 n <=>
+           (?j. i = BIT0 j /\ m <= j /\ j <= n) \/
+           (?j. i = BIT1 j /\ m <= j /\ j <= n)`,
+  REPEAT GEN_TAC THEN REWRITE_TAC[BIT0; BIT1] THEN
+  EQ_TAC THENL [ALL_TAC; ASM_ARITH_TAC] THEN
+  REPEAT STRIP_TAC THEN
+  ASM_CASES_TAC `EVEN i` THENL [DISJ1_TAC; DISJ2_TAC] THEN
+  MP_TAC (SPEC `i:num` EVEN_EXISTS_LEMMA) THEN ASM_REWRITE_TAC[] THEN
+  DISCH_THEN (X_CHOOSE_TAC `a:num`) THEN EXISTS_TAC `a:num` THEN
+  POP_ASSUM SUBST_VAR_TAC THEN ASM_ARITH_TAC);;
+
+let NUMINTERVAL_BIT0_BIT0 = prove
+ (`!m n i. BIT0 m <= i /\ i <= BIT0 n <=>
+           (?j. i = BIT0 j /\ m <= j /\ j <= n) \/
+           (?j. i = BIT1 j /\ m <= j /\ j < n)`,
+  REPEAT GEN_TAC THEN REWRITE_TAC[BIT0; BIT1] THEN
+  EQ_TAC THENL [ALL_TAC; ASM_ARITH_TAC] THEN
+  REPEAT STRIP_TAC THEN
+  ASM_CASES_TAC `EVEN i` THENL [DISJ1_TAC; DISJ2_TAC] THEN
+  MP_TAC (SPEC `i:num` EVEN_EXISTS_LEMMA) THEN ASM_REWRITE_TAC[] THEN
+  DISCH_THEN (X_CHOOSE_TAC `a:num`) THEN EXISTS_TAC `a:num` THEN
+  POP_ASSUM SUBST_VAR_TAC THEN ASM_ARITH_TAC);;
+
+(* ------------------------------------------------------------------------- *)
+
+let FORALL_NUMINTERVAL_REFL = prove
+ (`!P a. (!i. a <= i /\ i <= a ==> P i) <=> P a`,
+  REWRITE_TAC[NUMINTERVAL_REFL] THEN MESON_TAC[]);;
+
+let FORALL_NUMINTERVAL_BIT0_BIT1 = prove
+ (`!P m n. (!i. BIT0 m <= i /\ i <= BIT1 n ==> P i) <=>
+           (!j. m <= j /\ j <= n ==> P (BIT0 j)) /\
+           (!j. m <= j /\ j <= n ==> P (BIT1 j))`,
+  REWRITE_TAC[NUMINTERVAL_BIT0_BIT1] THEN MESON_TAC[]);;
+
+let FORALL_NUMINTERVAL_BIT0_BIT0 = prove
+ (`!P m n. (!i. BIT0 m <= i /\ i <= BIT0 n ==> P i) <=>
+           (!j. m <= j /\ j <= n ==> P (BIT0 j)) /\
+           (!j. m <= j /\ j < n ==> P (BIT1 j))`,
+  REWRITE_TAC[NUMINTERVAL_BIT0_BIT0] THEN MESON_TAC[]);;
+
+(* ------------------------------------------------------------------------- *)
+
+let CART_EQ_NUMSEG = prove
+ (`!x y:A^N. x = y <=> (!i. i IN 1..dimindex(:N) ==> x$i = y$i)`,
+  REWRITE_TAC[CART_EQ; IN_NUMSEG]);;
+
+let VECTOR_EQ_CONV : conv =
+  REWR_CONV CART_EQ_NUMSEG THENC
+  BINDER_CONV (LAND_CONV (RAND_CONV
+    (RAND_CONV DIMINDEX_CONV THENC NUMSEG_CONV))) THENC
+  GEN_REWRITE_CONV TOP_DEPTH_CONV
+    [FORALL_IN_INSERT; MESON[] `p /\ T <=> p`;
+     SET_RULE `(!i:num. i IN {} ==> P i) <=> T`] THENC
+  ONCE_DEPTH_CONV VECTOR_COMPONENT_CONV;;
+
+VECTOR_EQ_CONV `vector[3;a;b;1;5] = vector[a;1;b;c;0]`;;

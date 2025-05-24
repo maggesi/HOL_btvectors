@@ -1,0 +1,32 @@
+* Implementare
+** DONE Conversione per il calcolo delle componenti in VECTOR_REDUCE_CONV
+** DONE Conversioni per il calcolo matriciale e aggiunta a VECTOR_REDUCE_CONV
+** DONE Conversioni per gli indici base 1.
+** DONE Rinominare index0 in component0
+* Rivedere i nomi dei teoremi
+** DONE In make.hl
+** DONE In matrices.hl
+** DONE In binary.hl
+** DONE In vector0.hl
+** DONE In finvec.hl
+* Tests in file separati
+** DONE In binary.hl
+** DONE In vector0.hl
+** DONE In finvec.hl
+* Eliminare codice morto o da tenere privato e teoremi/definizioni non usate.
+** DONE In make.hl
+** DONE In matrices.hl
+** DONE In binary.hl
+** DONE In vector0.hl
+** DONE In finvec.hl
+** TODO Tutto finlambda.hl
+** TODO Tutto finvec_bool.hl
+* Rivedere i commenti
+** DONE In make.hl
+** DONE In matrices.hl
+** DONE In binary.hl
+** DONE In vector0.hl
+** DONE In finvec.hl
+* Demo
+** DONE Proiezione di un vettore su di un altro.
+** DONE Commutatore di matrici.
