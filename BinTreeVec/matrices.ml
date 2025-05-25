@@ -2,6 +2,7 @@
 (* Additions to the matrices library.                                        *)
 (*                                                                           *)
 (* (c) Copyright, Andrea Gabrielli, Marco Maggesi 2016-2017                  *)
+(* (c) Copyright, Marco Maggesi 2025                                         *)
 (* ========================================================================= *)
 
 let () = prioritize_vector();;

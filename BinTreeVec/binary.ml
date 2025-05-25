@@ -2,6 +2,7 @@
 (* Reasoning and computing with binary expansions of natural numbers.        *)
 (*                                                                           *)
 (* (c) Copyright, Andrea Gabrielli, Marco Maggesi 2017-2018                  *)
+(* (c) Copyright, Marco Maggesi 2025                                         *)
 (* ========================================================================= *)
 
 (* ------------------------------------------------------------------------- *)
@@ -224,13 +225,3 @@ let SUM_NUMSEG_LT = prove
           sum {i | i < n} (\i. f(2 * i + 1)))`,
   MP_TAC (MATCH_MP ITERATE_NUMSEG_LT MONOIDAL_REAL_ADD) THEN
   REWRITE_TAC[GSYM sum; NEUTRAL_REAL_ADD]);;
-
-let VSUM_NUMSEG_LT = prove
- (`(!f. vsum {i | i < 0} f = vec 0:real^N) /\
-   (!f. vsum {i | i < 1} f = f 0:real^N) /\
-   (!n f. vsum {i | i < n + 1} f = f n + vsum {i | i < n} f:real^N) /\
-   (!n f. vsum {i | i < 2 * n} f =
-          vsum {i | i < n} (\i. f(2 * i)) +
-          vsum {i | i < n} (\i. f(2 * i + 1)):real^N)`,
-  REWRITE_TAC[CART_EQ; vsum; VECTOR_ADD_COMPONENT; VEC_COMPONENT] THEN
-  SIMP_TAC[LAMBDA_BETA; SUM_NUMSEG_LT]);;
